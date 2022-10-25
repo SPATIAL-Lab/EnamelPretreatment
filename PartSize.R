@@ -2,9 +2,9 @@ library(readxl)
 psdata <- read_excel("ParticleSizeExp1.xlsx")
 
 library(tidyr)
-
 library(dplyr)
 library(data.table)
+
 ##Treated Coarse, Analyzed Coarse - Batch 1
 B1.CC <- data.table(filter(psdata,Tooth=="A",Treat=="CC",Analysis=="1"))
 
@@ -103,6 +103,7 @@ stdev.co3$b3diff <- stdev.co3$B3.CC - stdev.co3$B3.CF
 
 library(grDevices)
 ##Boxplots - Averages
+tiff("Figure4.tif", width = 1050, height = 700)
 par(mfrow=c(2,3))
 boxplot(avg.dc$b1diff,avg.dc$b3diff,avg.dc$b2diff,
         ylab = "",
@@ -212,6 +213,7 @@ boxplot(stdev.co3$b1diff,stdev.co3$b3diff,stdev.co3$b2diff,
         add = TRUE)
 title(ylab = expression('CO'[3]*'% standard deviation difference'), line = 2.25, cex.lab = 1.5)
 mtext("f)", side = 3, line = 0.5, las = 1, adj = 0)
+dev.off()
 
 ##F-tests
 b1b2.dc.ftest <- var.test(avg.dc$b1diff,avg.dc$b2diff)
