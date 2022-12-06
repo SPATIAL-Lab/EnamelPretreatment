@@ -1,5 +1,5 @@
 library(readxl)
-OrgContExp <- read_excel("OrgContExp.xlsx")
+OrgContExp <- read_excel("data/OrgContExp.xlsx")
 
 library(tidyr)
 ocdata <- separate(OrgContExp, "Original ID", sep="-",into=c("IA21","tooth",
