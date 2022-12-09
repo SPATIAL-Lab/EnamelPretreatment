@@ -1,12 +1,12 @@
 library(openxlsx)
 
-d1 = read.xlsx("~/GitHub/SIRFER/out/211104_21-244.xlsx", 1)
-d2 = read.xlsx("~/GitHub/SIRFER/out/211110_21-250.xlsx", 1)
-d3 = read.xlsx("~/GitHub/SIRFER/out/220920_22-243.xlsx", 1)
+d1 = read.xlsx("data/211104_21-244.xlsx", 1)
+d2 = read.xlsx("data/out/211110_21-250.xlsx", 1)
+d3 = read.xlsx("data/221104_22-279.xlsx", 1)
 
 d1$Batch = rep(211104)
 d2$Batch = rep(211110)
-d3$Batch = rep(220920)
+d3$Batch = rep(221104)
 
 d = rbind(d1, d2, d3)
 d = d[!(d$Identifier_1 %in% c("CARRARA", "MARBLE", "LSVEC", "MAR", 
@@ -17,7 +17,7 @@ d$Treat = d$Tooth = d$TT = character(nrow(d))
 for(i in 1:nrow(d)){
   d$Tooth[i] = strsplit(d$Identifier_1[i], "-")[[1]][1]
   d$Treat[i] = strsplit(d$Identifier_1[i], "-")[[1]][2]
-  if(d$Batch[i] == 220920 & d$Treat[i] %in% c("F", "G")){
+  if(d$Batch[i] == 221104 & d$Treat[i] %in% c("F", "G", "I")){
     d$Treat[i] = paste0(d$Treat[i], "2")
   }
   d$TT[i] = paste(d$Tooth[i], d$Treat[i], sep = "-")
@@ -26,8 +26,6 @@ for(i in 1:nrow(d)){
 #remove some outliers
 d = d[d$Identifier_1 != "C4-D-3",]
 d = d[d$Identifier_1 != "C5-A-3",]
-d = d[!(d$TT == "C5-G2" & d$Weight == 0.271),]
-d$d13C.cal[d$TT == "C2-CA" & d$Weight == 0.273] = NA
 
 TT = unique(d$TT)
 
@@ -42,7 +40,7 @@ for(i in 1:length(TT)){
   samps$d13C.sd[i] = sd(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
   samps$d18O.m[i] = mean(d$d18O.cal[d$TT == TT[i]], na.rm = TRUE)
   samps$d18O.sd[i] = sd(d$d18O.cal[d$TT == TT[i]], na.rm = TRUE)
-  samps$n[i] = sum(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
+  samps$n[i] = sum(d$TT == TT[i], na.rm = TRUE)
 }
 
 #offsets
@@ -64,33 +62,27 @@ for(i in sid){
   
   samps$d13C.m.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
     samps$d13C.m[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d13C.m[samps$Tooth == i & samps$Treat == "F2"] + 
-    (samps$d13C.m[samps$Tooth == i & samps$Treat == "F"] - 
-       samps$d13C.m[samps$Tooth == i & samps$Treat == "I"])
+    samps$d13C.m[samps$Tooth == i & samps$Treat == "I2"]
   samps$d18O.m.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
     samps$d18O.m[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d18O.m[samps$Tooth == i & samps$Treat == "F2"] +
-    (samps$d18O.m[samps$Tooth == i & samps$Treat == "F"] - 
-       samps$d18O.m[samps$Tooth == i & samps$Treat == "I"])
+    samps$d18O.m[samps$Tooth == i & samps$Treat == "I2"]
   samps$d13C.sd.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
     samps$d13C.sd[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d13C.sd[samps$Tooth == i & samps$Treat == "F2"] +
-    (samps$d13C.sd[samps$Tooth == i & samps$Treat == "F"] - 
-       samps$d13C.sd[samps$Tooth == i & samps$Treat == "I"])
+    samps$d13C.sd[samps$Tooth == i & samps$Treat == "I2"]
   samps$d18O.sd.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
     samps$d18O.sd[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d18O.sd[samps$Tooth == i & samps$Treat == "F2"] +
-    (samps$d18O.sd[samps$Tooth == i & samps$Treat == "F"] - 
-       samps$d18O.sd[samps$Tooth == i & samps$Treat == "I"])
+    samps$d18O.sd[samps$Tooth == i & samps$Treat == "I2"]
 }
 
-samps.treats = samps[!(samps$Treat %in% c("I", "F2")),]
+samps.treats = samps[!(samps$Treat %in% c("I", "I2")),]
 
 boxplot(d13C.m.off ~ Treat, samps.treats)
 abline(0, 0)
+png("~/d18O_oxy.png", width = 9, height = 5.5, units = "in", res = 600)
 par("mar" = c(5.1, 5.1, 2.1, 2.1))
 boxplot(d18O.m.off ~ Treat, samps.treats, xlab = "Treatment", 
         ylab = expression(delta^"18"*"O offset (vs control)"),
-        names = c("A", "B", "C", "Acid", "NaOCl", "D", "E", "F", "G",
-                  "Grep", "H"))
+        names = c("A", "B", "C", "HCl", "NaOCl", "D", "E", "F", "Frep",
+                  "G", "Grep", "H"))
 abline(0, 0)
+dev.off()

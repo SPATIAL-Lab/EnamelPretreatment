@@ -1,5 +1,5 @@
 library(readxl)
-StorageCondExp <- read_excel("StorageCondExp.xlsx")
+StorageCondExp <- read_excel("data/StorageCondExp.xlsx")
 
 library(tidyr)
 scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",

@@ -1,5 +1,5 @@
 library(readxl)
-psdata <- read_excel("ParticleSizeExp1.xlsx")
+psdata <- read_excel("data/ParticleSizeExp1.xlsx")
 
 library(tidyr)
 library(dplyr)
