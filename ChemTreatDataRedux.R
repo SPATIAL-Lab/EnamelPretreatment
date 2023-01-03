@@ -1,5 +1,5 @@
 #Note: this is the newest code for the pretreatment experiment. 
-library(openxlsx)
+library(openxlsx); library(tidyverse); library(viridis); library(ggpubr)
 
 d1 = read.xlsx("data/211104_21-244.xlsx", 1)
 d2 = read.xlsx("data/211110_21-250.xlsx", 1)
@@ -110,11 +110,14 @@ t.test(subset(samps.treats, Treat == "G")$d18O.m, subset(samps.treats, Treat == 
 #G not statistically significant
 
 #I'm doing it I'm combining them. 
+# WARNING: while the control was labeled "I" in the original dataset, 
+# I'm labeling "No oxidative treatment, buffered acetic acid 15 min" as "I" to continue the lettering scheme
+
 df <- samps.treats 
 df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
 
 # Tidyverse 4 lyfe
-ggplot() + 
+O <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
   geom_boxplot(data = df, aes(x = Treat, y = d18O.m.off, fill = Treat)) + 
   theme_classic() +
@@ -124,9 +127,9 @@ ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Treatment", 
-       y = expression(delta^"18"*"O offset (vs. control)"))
+       y = expression(delta^"18"*"O offset (vs control)"))
 
-ggplot() + 
+C <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
   geom_boxplot(data = df, aes(x = Treat, y = d13C.m.off, fill = Treat)) + 
   theme_classic() +
@@ -136,9 +139,9 @@ ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Treatment", 
-       y = expression(delta^"13"*"C offset (vs. control)"))
+       y = expression(delta^"13"*"C offset (vs control)"))
 
-ggplot() + 
+CO3 <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
   geom_boxplot(data = df, aes(x = Treat, y = CO3.m.off, fill = Treat)) + 
   theme_classic() +
@@ -148,4 +151,49 @@ ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Treatment", 
-       y = expression("% CO"[3]*" offset (vs. control)"))
+       y = expression("% CO"[3]*" offset (vs control)"))
+
+ggarrange(C, O, CO3, 
+          labels = c("A", "B", "C"),
+          ncol = 2, nrow = 2)
+
+
+# Some exploratory stats --------------------------------------------------
+
+# is there a difference between NaOCl and H2O2, regardless of time?
+df <- df %>% mutate(Group =
+                     case_when(Treat == "A" | Treat == "B" | Treat == "E" | Treat == "F" ~ "NaOCl", 
+                               Treat == "C" | Treat == "D" | Treat == "G" | Treat == "H" ~ "H2O2" 
+                               )
+              )
+
+t.test(df$d13C.m.off ~ df$Group)
+t.test(df$d18O.m.off ~ df$Group)
+t.test(df$CO3.m.off ~ df$Group)
+
+#nope, no differences there
+
+# is there a difference between time of exposure to the oxidative treatment (15m versus 24h), regardless of solution used?
+df <- df %>% mutate(Time =
+                      case_when(Treat == "A" | Treat == "B" | Treat == "C" | Treat == "D" ~ "15min", 
+                                Treat == "E" | Treat == "F" | Treat == "G" | Treat == "H" ~ "24h")
+)
+
+t.test(df$d13C.m.off ~ df$Time)
+t.test(df$d18O.m.off ~ df$Time)
+t.test(df$CO3.m.off ~ df$Time)
+# ALMOST significant in terms of changing oxygen values (unsurprising?) but not quite. 
+# 24 hours saw mean values of 0.48 offset, compared to 0.31 mean for 15 min group.
+
+# do we need to go back and compare these values to the control, rather than setting everything as offset relative to control? 
+# with this analysis run in two batches, comparing base values might not be appropriate actually. 
+
+# What's the mean + SD of offsets for treatments A-H
+mean(subset(df, Treat != "I" & Treat != "J")$d13C.m.off)
+sd(subset(df, Treat != "I" & Treat != "J")$d13C.m.off)
+
+mean(subset(df, Treat != "I" & Treat != "J")$d18O.m.off)
+sd(subset(df, Treat != "I" & Treat != "J")$d18O.m.off)
+
+mean(df$CO3.m.off)
+sd(df$CO3.m.off)
