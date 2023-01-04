@@ -185,6 +185,97 @@ t.test(df$CO3.m.off ~ df$Time)
 # ALMOST significant in terms of changing oxygen values (unsurprising?) but not quite. 
 # 24 hours saw mean values of 0.48 offset, compared to 0.31 mean for 15 min group.
 
+# UGHHHHHH let's do concentrations too just because although I can't imagine
+df <- df %>% mutate(Conc =
+                      case_when(Treat == "A" | Treat == "C" | Treat == "E" | Treat == "G" ~ "Low", 
+                                Treat == "B" | Treat == "D" | Treat == "F" | Treat == "H" ~ "High" 
+                      )
+)
+
+t.test(df$d13C.m.off ~ df$Conc)
+t.test(df$d18O.m.off ~ df$Conc)
+t.test(df$CO3.m.off ~ df$Conc)
+
+OGroup <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = subset(df, !is.na(Group)), aes(x = Group, y = d18O.m.off, fill = Group)) + 
+  theme_classic() +
+  scale_fill_viridis(option = "rocket", discrete = T) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression(delta^"18"*"O offset (vs control)"))
+
+CGroup <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = subset(df, !is.na(Group)), aes(x = Group, y = d13C.m.off, fill = Group)) + 
+  theme_classic() +
+  scale_fill_viridis(option = "rocket", discrete = T) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression(delta^"13"*"C offset (vs control)"))
+
+CO3Group <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = subset(df, !is.na(Group)), aes(x = Group, y = CO3.m.off, fill = Group)) + 
+  theme_classic() +
+  scale_fill_viridis(option = "rocket", discrete = T) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression("% CO"[3]*" offset (vs control)"))
+
+OTime <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = subset(df, !is.na(Time)), aes(x = Time, y = d18O.m.off, fill = Time)) + 
+  theme_classic() +
+  scale_fill_viridis(option = "rocket", discrete = T) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression(delta^"18"*"O offset (vs control)"))
+
+CTime <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = subset(df, !is.na(Time)), aes(x = Time, y = d13C.m.off, fill = Time)) + 
+  theme_classic() +
+  scale_fill_viridis(option = "rocket", discrete = T) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression(delta^"13"*"C offset (vs control)"))
+
+CO3Time <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = subset(df, !is.na(Time)), aes(x = Time, y = CO3.m.off, fill = Time)) + 
+  theme_classic() +
+  scale_fill_viridis(option = "rocket", discrete = T) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression("% CO"[3]*" offset (vs control)"))
+
+ggarrange(CGroup, OGroup, CO3Group, CTime, OTime, CO3Time, 
+          labels = c("A", "B", "C", "D", "E", "F"),
+          ncol = 3, nrow = 2)
+
+
+
+
+
 # do we need to go back and compare these values to the control, rather than setting everything as offset relative to control? 
 # with this analysis run in two batches, comparing base values might not be appropriate actually. 
 
