@@ -5,6 +5,9 @@ library(tidyr)
 library(dplyr)
 library(data.table)
 
+# Are the data normally distributed? 
+
+
 ##Treated Coarse, Analyzed Coarse - Batch 1
 B1.CC <- data.table(filter(psdata,Tooth=="A",Treat=="CC",Analysis=="1"))
 
