@@ -10,6 +10,8 @@ d2$Batch = rep(211110)
 d3$Batch = rep(221104)
 
 d = rbind(d1, d2, d3)
+
+
 #GRAPE Chris: does the line below do anything right now?
 d = d[!(d$Identifier_1 %in% c("CARRARA", "MARBLE", "LSVEC", "MAR", 
                               "COND - CARRARA", "COND - LSVEC")),]
@@ -115,48 +117,24 @@ t.test(subset(samps.treats, Treat == "G")$d18O.m, subset(samps.treats, Treat == 
 
 df <- samps.treats 
 df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
+#remove all but df because I like a clean environment
+rm(list=setdiff(ls(), "df"))
 
-# Tidyverse 4 lyfe
-O <- ggplot() + 
-  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = df, aes(x = Treat, y = d18O.m.off, fill = Treat)) + 
-  theme_classic() +
-  scale_fill_viridis(option = "rocket", discrete = T) +
-  theme(legend.position = "none", 
-        axis.text.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 16), ) +
-  labs(x = "Treatment", 
-       y = expression(delta^"18"*"O offset (vs control)"))
+palette <- c( "#668C99","#306879", "#FD9C86", "#F47A60", "#668C99","#306879",
+                       "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7")
 
-C <- ggplot() + 
-  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = df, aes(x = Treat, y = d13C.m.off, fill = Treat)) + 
-  theme_classic() +
-  scale_fill_viridis(option = "rocket", discrete = T) +
-  theme(legend.position = "none", 
-        axis.text.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 16), ) +
-  labs(x = "Treatment", 
-       y = expression(delta^"13"*"C offset (vs control)"))
-
-CO3 <- ggplot() + 
-  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = df, aes(x = Treat, y = CO3.m.off, fill = Treat)) + 
-  theme_classic() +
-  scale_fill_viridis(option = "rocket", discrete = T) +
-  theme(legend.position = "none", 
-        axis.text.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 16), ) +
-  labs(x = "Treatment", 
-       y = expression("% CO"[3]*" offset (vs control)"))
-
-ggarrange(C, O, CO3, 
-          labels = c("A", "B", "C"),
-          ncol = 2, nrow = 2)
-
+# Are the data normally distributed? 
+hist(df$d18O.m.off)
+hist(df$d13C.m.off)
+hist(df$CO3.m.off)
+#oh dear...
+shapiro.test(df$d18O.m.off)
+shapiro.test(df$d13C.m.off)
+shapiro.test(df$CO3.m.off)
+library(ggpubr)
+ggqqplot(df$d18O.m.off)
+ggqqplot(df$d13C.m.off)
+ggqqplot(df$CO3.m.off)
 
 # Some exploratory stats --------------------------------------------------
 
@@ -195,6 +173,50 @@ df <- df %>% mutate(Conc =
 t.test(df$d13C.m.off ~ df$Conc)
 t.test(df$d18O.m.off ~ df$Conc)
 t.test(df$CO3.m.off ~ df$Conc)
+
+# Tidyverse 4 lyfe
+O <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = df, aes(x = Treat, y = d18O.m.off, fill = Treat, color = Time)) + 
+  theme_classic() +
+  scale_fill_manual(values = palette) +
+  scale_color_manual(values = c("#F05039", "#1F449C")) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression(delta^"18"*"O offset (vs control)"))
+
+C <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = df, aes(x = Treat, y = d13C.m.off, fill = Treat, color = Time)) + 
+  theme_classic() +
+  scale_fill_manual(values = palette) +
+  scale_color_manual(values = c("#F05039", "#1F449C")) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression(delta^"13"*"C offset (vs control)"))
+
+CO3 <- ggplot() + 
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
+  geom_boxplot(data = df, aes(x = Treat, y = CO3.m.off, fill = Treat, color = Time)) + 
+  theme_classic() +
+  scale_fill_manual(values = palette) +
+  scale_color_manual(values = c("#F05039", "#1F449C")) +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 16), ) +
+  labs(x = "Treatment", 
+       y = expression("% CO"[3]*" offset (vs control)"))
+
+ggarrange(C, O, CO3,
+          ncol = 2, nrow = 2)
+ggsave("Figures/Treatment.png", dpi = 300)
 
 OGroup <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +

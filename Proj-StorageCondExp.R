@@ -3,7 +3,19 @@ StorageCondExp <- read_excel("data/StorageCondExp.xlsx")
 
 library(tidyr)
 scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",
-                                                                "AB","treat"))
+"AB","treat"))
+
+# Are the data normally distributed? 
+hist(StorageCondExp$dC)
+hist(StorageCondExp$dO)
+#oh dear...
+shapiro.test(StorageCondExp$dC)
+shapiro.test(StorageCondExp$dO)
+library(ggpubr)
+ggqqplot(StorageCondExp$dC)
+ggqqplot(StorageCondExp$dO)
+
+
 library(dplyr)
 cabinetT1 <- filter(scdata,AB=="A",Time=="T1")
 cabinetT2 <- filter(scdata,AB=="A",Time=="T2")

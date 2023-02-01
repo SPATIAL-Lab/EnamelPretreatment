@@ -6,7 +6,14 @@ library(dplyr)
 library(data.table)
 
 # Are the data normally distributed? 
-
+hist(psdata$dC)
+hist(psdata$dO)
+#oh dear...
+shapiro.test(psdata$dC)
+shapiro.test(psdata$dO)
+library(ggpubr)
+ggqqplot(psdata$dC)
+ggqqplot(psdata$dO)
 
 ##Treated Coarse, Analyzed Coarse - Batch 1
 B1.CC <- data.table(filter(psdata,Tooth=="A",Treat=="CC",Analysis=="1"))
