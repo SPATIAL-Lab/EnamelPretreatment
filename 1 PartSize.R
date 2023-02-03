@@ -1,19 +1,23 @@
+
+# Setup -------------------------------------------------------------------
+
 library(readxl)
 psdata <- read_excel("data/ParticleSizeExp1.xlsx")
 
-library(tidyr)
-library(dplyr)
-library(data.table)
+library(tidyr);library(dplyr);library(data.table); library(lsr)
 
 # Are the data normally distributed? 
 hist(psdata$dC)
 hist(psdata$dO)
+hist(psdata$CO3)
 #oh dear...
 shapiro.test(psdata$dC)
 shapiro.test(psdata$dO)
+shapiro.test(psdata$CO3)
 library(ggpubr)
 ggqqplot(psdata$dC)
 ggqqplot(psdata$dO)
+ggqqplot(psdata$CO3)
 
 ##Treated Coarse, Analyzed Coarse - Batch 1
 B1.CC <- data.table(filter(psdata,Tooth=="A",Treat=="CC",Analysis=="1"))
@@ -33,6 +37,7 @@ B3.CC <- data.table(filter(psdata,Tooth=="B",Treat=="CC",Analysis=="1"))
 ##Treated Coarse, Analyzed Fine - Batch 3
 B3.CF <- data.table(filter(psdata,Tooth=="B",Treat=="CF",Analysis=="1"))
 
+# Masters Tests and Figures -------------------------------------------------
 
 ##Averages and standard deviations of triplicates
 B1.CC[,"avgdc":=mean(dC),by="Tooth number"][,"avgdo":=mean(dO),by="Tooth number"][,"avgco3":=mean(CO3),by="Tooth number"][,"stdevdc":=sd(dC),by="Tooth number"][,"stdevdo":=sd(dO),by="Tooth number"][,"stdevco3":=sd(CO3),by="Tooth number"]
@@ -319,3 +324,154 @@ ttest.stdev.pvalues <- data.table(a=c("b1.dc","b2.dc","b3.dc",
 ttest.stdev.pvalues[pvalue < 0.05, sig:="significant"][pvalue > 0.1, sig:="not"]
 
 
+
+# Publication Tests -------------------------------------------------------
+agg_all <- psdata %>% group_by(Sample) %>% 
+  summarize(d13C = mean(dC), 
+            d18O = mean(dO), 
+            CO3 = mean(CO3))
+
+# Are the data normally distributed? 
+hist(agg_all$d13C)
+hist(agg_all$d18O)
+hist(agg_all$CO3)
+#oh dear...
+shapiro.test(agg_all$d13C)
+shapiro.test(agg_all$d18O)
+shapiro.test(agg_all$CO3)
+library(ggpubr)
+ggqqplot(agg_all$d13C)
+ggqqplot(agg_all$d18O)
+ggqqplot(agg_all$CO3)
+  
+agg_B1CC <- B1.CC %>% group_by(`Tooth number`) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3), 
+            Treat = Treat, 
+            Group = '1')
+
+agg_B1FF <- B1.FF %>% group_by(`Tooth number`) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3), 
+            Treat = Treat, 
+            Group = '1')
+
+agg_B2CF <- B2.CF %>% group_by(`Tooth number`) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3), 
+            Treat = Treat, 
+            Group = '2')
+
+agg_B2FF <- B2.FF %>% group_by(`Tooth number`) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3), 
+            Treat = Treat, 
+            Group = '2')
+
+agg_B3CC <- B3.CC %>% group_by(`Tooth number`) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3), 
+            Treat = Treat, 
+            Group = '3')
+
+agg_B3CF <- B3.CF %>% group_by(`Tooth number`) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3), 
+            Treat = Treat, 
+            Group = '3')
+
+CCFF <- rbind(agg_B1CC, agg_B1FF)
+CFFF <- rbind(agg_B2CF, agg_B2FF)
+CCCF <- rbind(agg_B3CC, agg_B3CF)
+
+#CC-FF
+
+median(agg_B1CC$dC)
+median(agg_B1FF$dC)
+wilcox.test(CCFF$dC ~ CCFF$Treat)
+
+median(agg_B1CC$dO)
+median(agg_B1FF$dO)
+wilcox.test(CCFF$dO ~ CCFF$Treat)
+
+median(agg_B1CC$CO3)
+median(agg_B1FF$CO3)
+wilcox.test(CCFF$CO3 ~ CCFF$Treat)
+cohensD(agg_B1CC$CO3, agg_B1FF$CO3)
+#CF-FF
+
+median(agg_B2CF$dC)
+median(agg_B2FF$dC)
+wilcox.test(CFFF$dC ~ CFFF$Treat)
+
+median(agg_B2CF$dO)
+median(agg_B2FF$dO)
+wilcox.test(CFFF$dO ~ CFFF$Treat)
+
+median(agg_B2CF$CO3)
+median(agg_B2FF$CO3)
+wilcox.test(CFFF$CO3 ~ CFFF$Treat)
+cohensD(agg_B2CF$CO3, agg_B2FF$CO3)
+
+#CC-CF
+
+median(agg_B3CC$dC)
+median(agg_B3CF$dC)
+wilcox.test(CCCF$dC ~ CCCF$Treat)
+
+median(agg_B3CC$dO)
+median(agg_B3CF$dO)
+wilcox.test(CCCF$dO ~ CCCF$Treat)
+
+median(agg_B3CC$CO3)
+median(agg_B3CF$CO3)
+wilcox.test(CCCF$CO3 ~ CCCF$Treat)
+cohensD(agg_B3CC$CO3, agg_B3CF$CO3)
+http://127.0.0.1:10673/graphics/plot_zoom_png?width=1200&height=900
+#Plots
+
+#boxplots of our three values? 
+C <- ggplot() + 
+  geom_boxplot(data = CCFF, aes(x = Group, y = dC, fill = Treat)) +
+  geom_boxplot(data = CFFF, aes(x = Group, y = dC, fill = Treat)) +
+  geom_boxplot(data = CCCF, aes(x = Group, y = dC, fill = Treat)) +
+  scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
+  labs(
+  #  fill = "Particle Size", 
+    y = expression(paste(delta^13, "C", " (\u2030, VPDB)"))
+  ) + 
+  theme_classic() + 
+  theme(legend.position = 'none')
+
+O <- ggplot() + 
+  geom_boxplot(data = CCFF, aes(x = Group, y = dO, fill = Treat)) +
+  geom_boxplot(data = CFFF, aes(x = Group, y = dO, fill = Treat)) +
+  geom_boxplot(data = CCCF, aes(x = Group, y = dO, fill = Treat)) +
+  scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
+  labs(
+ #   fill = "Particle Size", 
+    y = expression(paste(delta^18, "O", " (\u2030, VPDB)"))
+  ) + 
+  theme_classic() + 
+  theme(legend.position = 'none')
+
+CO3 <- ggplot() + 
+  geom_boxplot(data = CCFF, aes(x = Group, y = CO3, fill = Treat)) +
+  geom_boxplot(data = CFFF, aes(x = Group, y = CO3, fill = Treat)) +
+  geom_boxplot(data = CCCF, aes(x = Group, y = CO3, fill = Treat)) +
+  scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
+  labs(
+#   fill = "Particle Size", 
+    y = expression(paste("% CO"[3]))
+  ) + 
+  theme_classic() + 
+  theme(legend.position = 'none')
+
+ggarrange(C, O, CO3)
+ggsave("Figures/ParticleSize.png")

@@ -1,19 +1,81 @@
+# Setup -------------------------------------------------------------------
+
+library(readxl); library(tidyverse); library(lsr)
+StorageCondExp <- read_excel("data/StorageCondExp.xlsx")
+StorageCondExp$sample_id <- substr(StorageCondExp$`Sample ID`, 7, 11)
+scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",
+                                                               "AB","treat"))
+scdata$sample_id <- gsub("-", "", scdata$sample_id)
+
+ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "37 Days", 
+         location = "Cabinet")
+
+ambientT2 <- filter(scdata,AB=="A",Time=="T2") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "71 Days", 
+         location = "Cabinet")
+
+desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "37 Days", 
+         location = "Desiccator")
+
+desiccatorT2 <- filter(scdata,AB=="B",Time=="T2") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "71 Days", 
+         location = "Desiccator")
+
+df <- rbind(ambientT1, ambientT2, desiccatorT1, desiccatorT2) %>% 
+  mutate(condition = paste(time, location))
+
+# Are the data normally distributed? 
+hist(df$dC)
+hist(df$dO)
+hist(df$CO3)
+#oh dear...
+shapiro.test(df$dC)
+shapiro.test(df$dO)
+shapiro.test(df$CO3)
+library(ggpubr)
+ggqqplot(df$dC)
+ggqqplot(df$dO)
+ggqqplot(df$CO3)
+
+kruskal.test(dC ~ condition, data = df)
+kruskal.test(dO ~ condition, data = df)
+kruskal.test(CO3 ~ condition, data = df)
+
+# Post-hoc tests
+median(subset(df, time == '37 Days')$CO3)
+median(subset(df, time == '71 Days')$CO3)
+wilcox.test(df$CO3 ~ df$time)
+cohensD(subset(df, time == '37 Days')$CO3, subset(df, time == '71 Days')$CO3)
+
+median(subset(df, location == 'Cabinet')$CO3)
+median(subset(df, location == 'Desiccator')$CO3)
+wilcox.test(df$CO3 ~ df$location)
+# From Masters ------------------------------------------------------------
+
 library(readxl)
 StorageCondExp <- read_excel("data/StorageCondExp.xlsx")
 
 library(tidyr)
 scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",
 "AB","treat"))
-
-# Are the data normally distributed? 
-hist(StorageCondExp$dC)
-hist(StorageCondExp$dO)
-#oh dear...
-shapiro.test(StorageCondExp$dC)
-shapiro.test(StorageCondExp$dO)
-library(ggpubr)
-ggqqplot(StorageCondExp$dC)
-ggqqplot(StorageCondExp$dO)
 
 
 library(dplyr)

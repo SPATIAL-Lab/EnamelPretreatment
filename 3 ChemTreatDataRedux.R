@@ -121,7 +121,7 @@ df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
 rm(list=setdiff(ls(), "df"))
 
 palette <- c( "#668C99","#306879", "#FD9C86", "#F47A60", "#668C99","#306879",
-                       "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7")
+                       "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7", "green")
 
 # Are the data normally distributed? 
 hist(df$d18O.m.off)
@@ -137,6 +137,12 @@ ggqqplot(df$d13C.m.off)
 ggqqplot(df$CO3.m.off)
 
 # Some exploratory stats --------------------------------------------------
+#Only exploring difference in oxidative treatment, so not including I and J
+# Wait ignore, this is seeing if there's difference between eachother, we're interested if they're different from the control
+kruskal.test(d13C.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J"))
+kruskal.test(d18O.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J"))
+kruskal.test(CO3.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J"))
+
 
 # is there a difference between NaOCl and H2O2, regardless of time?
 df <- df %>% mutate(Group =
@@ -310,3 +316,35 @@ sd(subset(df, Treat != "I" & Treat != "J")$d18O.m.off)
 
 mean(df$CO3.m.off)
 sd(df$CO3.m.off)
+
+
+# from request 2 Feb 2023 from Gabe, make a quick plot of the O isotope offset
+# (relative to control) vs measured d18O value (means for each tooth OK) for the
+# final treatment (NaOCl with no acetic acid)? And I guess a second on showing the same for C?
+J <- subset(df, Treat == "J")
+
+ggplot(data = J) + 
+  geom_point(aes(x = d18O.m.off, y = d18O.m), size = 3) + 
+  theme_classic() + 
+  labs(x = 'Oxygen mean offset',
+       y = 'Oxygen mean measured')
+
+ggplot(data = J) + 
+  geom_point(aes(x = d13C.m.off, y = d13C.m), size = 3) + 
+  theme_classic() + 
+  labs(x = 'Carbon mean offset',
+       y = 'Carbon mean measured')
+
+ggplot(data = df) + 
+  geom_point(aes(x = d18O.m.off, y = d18O.m, color = Treat), size = 3) + 
+  scale_color_viridis(discrete = T, option = 'H') + 
+  theme_dark() + 
+  labs(x = 'Oxygen mean offset',
+       y = 'Oxygen mean measured')
+
+ggplot(data = df) + 
+  geom_point(aes(x = d13C.m.off, y = d13C.m, color = Treat), size = 3) + 
+  scale_color_viridis(discrete = T, option = 'H') + 
+  theme_dark() + 
+  labs(x = 'Carbon mean offset',
+       y = 'Carbon mean measured')
