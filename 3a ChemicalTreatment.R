@@ -1,9 +1,9 @@
 # code for paper
-#Note: this is the newest code for the pretreatment experiment. 
+# Note: this is the newest code for the pretreatment experiment. 
 library(openxlsx); library(tidyverse); library(viridis); 
 library(ggpubr); library(lsr)
 
-#Import and batch name
+# Import and batch name
 d1 = read.xlsx("data/211104_21-244.xlsx", 1)
 d2 = read.xlsx("data/211110_21-250.xlsx", 1)
 d3 = read.xlsx("data/221104_22-279.xlsx", 1)
@@ -14,7 +14,7 @@ d3$Batch = rep(221104)
 
 d = rbind(d1, d2, d3)
 
-#Identify Treatment Types
+# Identify Treatment Types
 d$Treat = d$Tooth = d$TT = character(nrow(d))
 
 for(i in 1:nrow(d)){
@@ -26,7 +26,7 @@ for(i in 1:nrow(d)){
   d$TT[i] = paste(d$Tooth[i], d$Treat[i], sep = "-")
 }
 
-#remove some outliers
+# Remove some outliers
 d = d[d$Identifier_1 != "C4-D-3",]
 d = d[d$Identifier_1 != "C5-A-3",]
 

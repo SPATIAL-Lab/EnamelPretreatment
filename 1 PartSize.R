@@ -433,10 +433,11 @@ median(agg_B3CC$CO3)
 median(agg_B3CF$CO3)
 wilcox.test(CCCF$CO3 ~ CCCF$Treat)
 cohensD(agg_B3CC$CO3, agg_B3CF$CO3)
-http://127.0.0.1:10673/graphics/plot_zoom_png?width=1200&height=900
-#Plots
 
-#boxplots of our three values? 
+
+# Graphs ------------------------------------------------------------------
+
+#boxplots of our three values 
 C <- ggplot() + 
   geom_boxplot(data = CCFF, aes(x = Group, y = dC, fill = Treat)) +
   geom_boxplot(data = CFFF, aes(x = Group, y = dC, fill = Treat)) +
@@ -474,4 +475,4 @@ CO3 <- ggplot() +
   theme(legend.position = 'none')
 
 ggarrange(C, O, CO3)
-ggsave("Figures/ParticleSize.png")
+ggsave("Figures/ParticleSize.pdf")
