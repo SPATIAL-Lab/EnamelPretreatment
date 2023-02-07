@@ -1,23 +1,10 @@
 
 # Setup -------------------------------------------------------------------
-
+# note: do everything in setup and then move to publication tests
 library(readxl)
 psdata <- read_excel("data/ParticleSizeExp1.xlsx")
 
 library(tidyr);library(dplyr);library(data.table); library(lsr)
-
-# Are the data normally distributed? 
-hist(psdata$dC)
-hist(psdata$dO)
-hist(psdata$CO3)
-#oh dear...
-shapiro.test(psdata$dC)
-shapiro.test(psdata$dO)
-shapiro.test(psdata$CO3)
-library(ggpubr)
-ggqqplot(psdata$dC)
-ggqqplot(psdata$dO)
-ggqqplot(psdata$CO3)
 
 ##Treated Coarse, Analyzed Coarse - Batch 1
 B1.CC <- data.table(filter(psdata,Tooth=="A",Treat=="CC",Analysis=="1"))
@@ -36,6 +23,7 @@ B3.CC <- data.table(filter(psdata,Tooth=="B",Treat=="CC",Analysis=="1"))
 
 ##Treated Coarse, Analyzed Fine - Batch 3
 B3.CF <- data.table(filter(psdata,Tooth=="B",Treat=="CF",Analysis=="1"))
+
 
 # Masters Tests and Figures -------------------------------------------------
 
@@ -326,6 +314,7 @@ ttest.stdev.pvalues[pvalue < 0.05, sig:="significant"][pvalue > 0.1, sig:="not"]
 
 
 # Publication Tests -------------------------------------------------------
+
 agg_all <- psdata %>% group_by(Sample) %>% 
   summarize(d13C = mean(dC), 
             d18O = mean(dO), 
@@ -347,44 +336,44 @@ ggqqplot(agg_all$CO3)
 agg_B1CC <- B1.CC %>% group_by(`Tooth number`) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
-            CO3 = mean(CO3), 
-            Treat = Treat, 
-            Group = '1')
+            CO3 = mean(CO3),
+            Treat = 'CC', 
+            Group = 1)
 
 agg_B1FF <- B1.FF %>% group_by(`Tooth number`) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3), 
-            Treat = Treat, 
-            Group = '1')
+            Treat = 'FF', 
+            Group = 1)
 
 agg_B2CF <- B2.CF %>% group_by(`Tooth number`) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3), 
-            Treat = Treat, 
-            Group = '2')
+            Treat = 'CF', 
+            Group = 2)
 
 agg_B2FF <- B2.FF %>% group_by(`Tooth number`) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3), 
-            Treat = Treat, 
-            Group = '2')
+            Treat = 'FF', 
+            Group = 2)
 
 agg_B3CC <- B3.CC %>% group_by(`Tooth number`) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3), 
-            Treat = Treat, 
-            Group = '3')
+            Treat = 'CC', 
+            Group = 3)
 
 agg_B3CF <- B3.CF %>% group_by(`Tooth number`) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3), 
-            Treat = Treat, 
-            Group = '3')
+            Treat = 'CF', 
+            Group = 3)
 
 CCFF <- rbind(agg_B1CC, agg_B1FF)
 CFFF <- rbind(agg_B2CF, agg_B2FF)
@@ -404,6 +393,7 @@ median(agg_B1CC$CO3)
 median(agg_B1FF$CO3)
 wilcox.test(CCFF$CO3 ~ CCFF$Treat)
 cohensD(agg_B1CC$CO3, agg_B1FF$CO3)
+
 #CF-FF
 
 median(agg_B2CF$dC)
@@ -433,7 +423,6 @@ median(agg_B3CC$CO3)
 median(agg_B3CF$CO3)
 wilcox.test(CCCF$CO3 ~ CCCF$Treat)
 cohensD(agg_B3CC$CO3, agg_B3CF$CO3)
-
 
 # Graphs ------------------------------------------------------------------
 
