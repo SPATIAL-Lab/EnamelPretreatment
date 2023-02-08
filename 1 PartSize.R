@@ -375,15 +375,37 @@ agg_B3CF <- B3.CF %>% group_by(`Tooth number`) %>%
             Treat = 'CF', 
             Group = 3)
 
-CCFF <- rbind(agg_B1CC, agg_B1FF)
-CFFF <- rbind(agg_B2CF, agg_B2FF)
-CCCF <- rbind(agg_B3CC, agg_B3CF)
+##GJB Rather than this, the final datasets should be comprised of
+##pairwise differences
+#CCFF <- rbind(agg_B1CC, agg_B1FF)
+#CFFF <- rbind(agg_B2CF, agg_B2FF)
+#CCCF <- rbind(agg_B3CC, agg_B3CF)
+CCFF = cbind(agg_B1CC$`Tooth number`, agg_B1CC[,2:4] - agg_B1FF[,2:4])
+CFFF = cbind(agg_B2CF$`Tooth number`, agg_B2CF[,2:4] - agg_B2FF[,2:4])
+CCCF = cbind(agg_B3CC$`Tooth number`, agg_B3CC[,2:4] - agg_B3CF[,2:4])
 
 #CC-FF
 
-median(agg_B1CC$dC)
-median(agg_B1FF$dC)
-wilcox.test(CCFF$dC ~ CCFF$Treat)
+##GJB Then the effect size is the mean or median of the differences
+##and we can do a 1 sample test
+#median(agg_B1CC$dC)
+#median(agg_B1FF$dC)
+#wilcox.test(CCFF$dC ~ CCFF$Treat)
+median(CCFF$dC)
+wilcox.test(CCFF$dC)
+
+##GJB These normality tests are kinda pointless on these small sample
+##sizes, but
+hist(CCFF$dC)
+shapiro.test(CCFF$dC)
+
+##GJB If we group and center the difference values from the 3 experiments
+##what does it look like?
+DeltaC = c(CCFF$dC - mean(CCFF$dC), CCCF$dC - mean(CCCF$dC),
+           CFFF$dC - mean(CFFF$dC))
+hist(DeltaC)
+shapiro.test(DeltaC)
+##OK, not any better, so maybe sticking with nonparametric is best...
 
 median(agg_B1CC$dO)
 median(agg_B1FF$dO)
