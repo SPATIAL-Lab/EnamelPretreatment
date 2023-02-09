@@ -392,7 +392,7 @@ CCCF = cbind(agg_B3CC$`Tooth number`, agg_B3CC[,2:4] - agg_B3CF[,2:4])
 #median(agg_B1FF$dC)
 #wilcox.test(CCFF$dC ~ CCFF$Treat)
 median(CCFF$dC)
-wilcox.test(CCFF$dC)
+wilcox.test(CCCF$dO)
 
 ##GJB These normality tests are kinda pointless on these small sample
 ##sizes, but
