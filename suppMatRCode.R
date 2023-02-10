@@ -13,6 +13,7 @@ usePackage("readxl");usePackage("tidyverse"); usePackage("lsr")
 # Particle Size Statistics ------------------------------------------------
 
 psdata <- read_excel("data/ParticleSizeExp1.xlsx")
+
 # Aggregate Replicates
 
 psdata <- psdata %>% group_by(Sample) %>% 
@@ -81,5 +82,96 @@ t.test(CCCFdelta$CO3)
 
 
 # Particle Size Figures ---------------------------------------------------
+
+
+# Storage Conditions Statistics--------------------------------------------
+
+StorageCondExp <- read_excel("data/StorageCondExp.xlsx")
+StorageCondExp$sample_id <- substr(StorageCondExp$`Sample ID`, 7, 11)
+scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",
+                                                               "AB","treat"))
+scdata$sample_id <- gsub("-", "", scdata$sample_id)
+
+
+ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "37 Days", 
+         location = "Cabinet")
+
+ambientT2 <- filter(scdata,AB=="A",Time=="T2") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "71 Days", 
+         location = "Cabinet")
+
+ambient <- rbind(ambientT1, ambientT2) %>% 
+  group_by(sample_id) %>% 
+  mutate(dC = dC[time == '37 Days'] - dC[time == '71 Days'], 
+         dO = dO[time == '37 Days'] - dO[time == '71 Days'], 
+         CO3 = CO3[time == '37 Days'] - CO3[time == '71 Days']) %>% 
+  distinct(sample_id, .keep_all = T) %>% 
+  select(-c(time))
+
+desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "37 Days", 
+         location = "Desiccator")
+
+desiccatorT2 <- filter(scdata,AB=="B",Time=="T2") %>% 
+  group_by(sample_id) %>% 
+  summarize(dC = mean(dC), 
+            dO = mean(dO), 
+            CO3 = mean(CO3)) %>%  
+  mutate(time = "71 Days", 
+         location = "Desiccator")
+
+desiccator <- rbind(desiccatorT1, desiccatorT2) %>% 
+  group_by(sample_id) %>% 
+  mutate(dC = dC[time == '37 Days'] - dC[time == '71 Days'], 
+         dO = dO[time == '37 Days'] - dO[time == '71 Days'], 
+         CO3 = CO3[time == '37 Days'] - CO3[time == '71 Days']) %>% 
+  distinct(sample_id, .keep_all = T) %>% 
+  select(-c(time))
+
+storage <- rbind(desiccator, ambient)
+
+# Testing for normality
+
+shapiro.test(storage$dC)
+shapiro.test(storage$dO)
+shapiro.test(storage$CO3)
+
+# T-tests
+
+t.test(storage$dC)
+t.test(storage$dO)
+t.test(storage$CO3)
+
+t.test(dC ~ location, data = storage)
+t.test(dO ~ location, data = storage)
+t.test(CO3 ~ location, data = storage)
+
+# Storage Conditions Figures ----------------------------------------------
+
+ggplot(data = storage, aes(x = location, y = dC)) + 
+         geom_boxplot() + 
+         theme_classic()
+
+ggplot(data = storage, aes(x = location, y = dO)) + 
+  geom_boxplot() + 
+  theme_classic()
+
+ggplot(data = storage, aes(x = location, y = CO3)) + 
+  geom_boxplot() + 
+  theme_classic()
+
 
 

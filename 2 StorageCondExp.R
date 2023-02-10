@@ -7,6 +7,7 @@ scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",
                                                                "AB","treat"))
 scdata$sample_id <- gsub("-", "", scdata$sample_id)
 
+
 ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>% 
   group_by(sample_id) %>% 
   summarize(dC = mean(dC), 
@@ -23,6 +24,14 @@ ambientT2 <- filter(scdata,AB=="A",Time=="T2") %>%
   mutate(time = "71 Days", 
          location = "Cabinet")
 
+ambient <- rbind(ambientT1, ambientT2) %>% 
+  group_by(sample_id) %>% 
+  mutate(dC = dC[time == '37 Days'] - dC[time == '71 Days'], 
+         dO = dO[time == '37 Days'] - dO[time == '71 Days'], 
+         CO3 = CO3[time == '37 Days'] - CO3[time == '71 Days']) %>% 
+  distinct(sample_id, .keep_all = T) %>% 
+  select(-c(location, time))
+
 desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>% 
   group_by(sample_id) %>% 
   summarize(dC = mean(dC), 
@@ -38,6 +47,14 @@ desiccatorT2 <- filter(scdata,AB=="B",Time=="T2") %>%
             CO3 = mean(CO3)) %>%  
   mutate(time = "71 Days", 
          location = "Desiccator")
+
+dessiccator <- rbind(desiccatorT1, desiccatorT2) %>% 
+  group_by(sample_id) %>% 
+  mutate(dC = dC[time == '37 Days'] - dC[time == '71 Days'], 
+         dO = dO[time == '37 Days'] - dO[time == '71 Days'], 
+         CO3 = CO3[time == '37 Days'] - CO3[time == '71 Days']) %>% 
+  distinct(sample_id, .keep_all = T) %>% 
+  select(-c(location, time))
 
 df <- rbind(ambientT1, ambientT2, desiccatorT1, desiccatorT2) %>% 
   mutate(condition = paste(time, location))
