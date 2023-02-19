@@ -25,11 +25,14 @@ psdata <- unique(psdata)
 # Pull apart comparative batches and create delta values
 
 CCFF <- psdata %>% filter(Tooth == "A" & Analysis == "1") %>% 
-  filter(Treat == "FF" | Treat == "CC")
+  filter(Treat == "FF" | Treat == "CC") %>% 
+  mutate(Group = 'CCFF')
 CFFF <- psdata %>% filter(Tooth == "A" & Analysis == "2") %>% 
-  filter(Treat == "CF" | Treat == "FF")
+  filter(Treat == "CF" | Treat == "FF") %>% 
+  mutate(Group = 'CFFF')
 CCCF <- psdata %>% filter(Tooth == "B") %>% 
-  filter(Treat == "CC" | Treat == "CF")
+  filter(Treat == "CC" | Treat == "CF") %>% 
+  mutate(Group = 'CCCF')
 
 CCFFdelta <- CCFF %>%
   group_by(toothNumber) %>%
@@ -69,6 +72,12 @@ shapiro.test(CCCFdelta$CO3)
 
 # No tests result in p < 0.05, we'll move forward with t-tests
 
+t.test(CCCFdelta$dC)
+t.test(CCCFdelta$dO)
+cohensD(CCCFdelta$dO)
+t.test(CCCFdelta$CO3)
+cohensD(CCCFdelta$CO3)
+
 t.test(CCFFdelta$dC)
 t.test(CCFFdelta$dO)
 t.test(CCFFdelta$CO3)
@@ -78,11 +87,6 @@ t.test(CFFFdelta$dC)
 t.test(CFFFdelta$dO)
 t.test(CFFFdelta$CO3)
 cohensD(CFFFdelta$CO3)
-
-t.test(CCCFdelta$dC)
-t.test(CCCFdelta$dO)
-t.test(CCCFdelta$CO3)
-
 
 # Particle Size Figures ---------------------------------------------------
 
@@ -181,6 +185,23 @@ desiccator <- rbind(desiccatorT1, desiccatorT2) %>%
   distinct(sample_id, .keep_all = T) %>% 
   select(-c(time))
 
+storage <- rbind(ambient, desiccator)
+
+# Testing for normality
+
+shapiro.test(storage$dC)
+shapiro.test(storage$dO)
+shapiro.test(storage$CO3)
+
+# T-tests
+
+t.test(storage$dC)
+t.test(storage$dO)
+t.test(storage$CO3)
+cohensD(storage$CO3)
+
+# Setting up to compare storage conditions
+
 ambientT1$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
 ambientT2$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
 desiccatorT1$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
@@ -202,38 +223,34 @@ T2 <- rbind(ambientT2, desiccatorT2) %>%
   distinct(sample_id, .keep_all = T) %>% 
   select(-c(location))  
 
-storage <- rbind(T1, T2)
+storage2 <- rbind(T1, T2)
 
-# Testing for normality
+# Are the data normally distributed? 
 
-shapiro.test(storage$dC)
-shapiro.test(storage$dO)
-shapiro.test(storage$CO3)
+shapiro.test(storage2$dC)
+shapiro.test(storage2$dO)
+shapiro.test(storage2$CO3)
 
-# T-tests
+# Tests
+t.test(storage2$dC)
+wilcox.test(storage2$dO)
+t.test(storage2$CO3)
 
-t.test(storage$dC)
-t.test(storage$dO)
-t.test(storage$CO3)
-
-t.test(dC ~ time, data = storage)
-t.test(dO ~ time, data = storage)
-t.test(CO3 ~ time, data = storage)
 
 # Storage Conditions Figures ----------------------------------------------
 # probably not used in the publication, but useful for quick examination
-ggplot(data = storage, aes(x = location, y = dC)) + 
-         geom_boxplot() + 
-         theme_classic()
 
-ggplot(data = storage, aes(x = location, y = dO)) + 
+ggplot(data = storage2, aes(x = time, y = dC)) + 
   geom_boxplot() + 
   theme_classic()
 
-ggplot(data = storage, aes(x = location, y = CO3)) + 
+ggplot(data = storage2, aes(x = time, y = dO)) + 
   geom_boxplot() + 
   theme_classic()
 
+ggplot(data = storage2, aes(x = time, y = CO3)) + 
+  geom_boxplot() + 
+  theme_classic()
 
 # Chemical Treatment Statistics -------------------------------------------
  
@@ -353,6 +370,7 @@ shapiro.test(subset(df, Treat != 'Control')$CO3.m.off)
 
 kruskal.test(d13C.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J"))
 summary(aov(d18O.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J")))
+
 summary(aov(CO3.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J")))
 
 mean(subset(df, Treat != "I" & Treat != "J" & Treat != "Control")$d13C.m.off)
