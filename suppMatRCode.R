@@ -132,8 +132,9 @@ PartSizeCO3 <- ggplot() +
   theme_classic() + 
   theme(legend.position = 'none')
 
-ggarrange(PartSizeC, PartSizeO, PartSizeCO3)
-ggsave("Figures/ParticleSize.pdf")
+ggarrange(PartSizeC, PartSizeO, PartSizeCO3, nrow = 1)
+ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 9, height = 3,
+       units = c("in"))
 
 # Storage Conditions Statistics--------------------------------------------
 
@@ -421,7 +422,7 @@ df <- df %>% mutate(Group =
                       )
 )
 
-wilcox.test(df$d13C.m.off ~ df$Group)
+t.test(df$d13C.m.off ~ df$Group)
 t.test(df$d18O.m.off ~ df$Group)
 t.test(df$CO3.m.off ~ df$Group)
 
@@ -431,7 +432,7 @@ df <- df %>% mutate(Time =
                                 Treat == "E" | Treat == "F" | Treat == "G" | Treat == "H" ~ "24h")
 )
 
-wilcox.test(df$d13C.m.off ~ df$Time)
+t.test(df$d13C.m.off ~ df$Time)
 t.test(df$d18O.m.off ~ df$Time)
 t.test(df$CO3.m.off ~ df$Time)
 # ALMOST significant in terms of changing oxygen values (unsurprising?) but not quite. 
@@ -444,7 +445,7 @@ df <- df %>% mutate(Conc =
                       )
 )
 
-wilcox.test(df$d13C.m.off ~ df$Conc)
+t.test(df$d13C.m.off ~ df$Conc)
 t.test(df$d18O.m.off ~ df$Conc)
 t.test(df$CO3.m.off ~ df$Conc)
 #no significant values there either
@@ -467,7 +468,7 @@ O <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Treatment", 
-       y = expression(delta^"18"*"O offset (vs control)"))
+       y = expression(paste(Delta^18, "O", " (\u2030, VPDB)")))
 
 C <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -480,7 +481,7 @@ C <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Treatment", 
-       y = expression(delta^"13"*"C offset (vs control)"))
+       y = expression(paste(Delta^13, "C", " (\u2030, VPDB)")))
 
 CO3 <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -493,11 +494,11 @@ CO3 <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Treatment", 
-       y = expression("% CO"[3]*" offset (vs control)"))
+       y = expression(paste(Delta, "% CO"[3])))
 
 ggarrange(C, O, CO3,
           ncol = 2, nrow = 2)
-ggsave("Figures/Treatment.pdf", dpi = 300)
+ggsave("Figures/Treatment.pdf", dpi = 300, width = 7, height = 5, units = c('in'))
 
 OGroup <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -509,7 +510,7 @@ OGroup <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Oxidant Treatment", 
-       y = expression(delta^"18"*"O offset (vs control)"))
+       y = expression(paste(Delta^18, "O", " (\u2030, VPDB)")))
 
 CGroup <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -521,7 +522,7 @@ CGroup <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Oxidant Treatment", 
-       y = expression(delta^"13"*"C offset (vs control)"))
+       y = expression(paste(Delta^13, "C", " (\u2030, VPDB)")))
 
 CO3Group <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -533,7 +534,7 @@ CO3Group <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 16), ) +
   labs(x = "Oxidant Treatment", 
-       y = expression("% CO"[3]*" offset (vs control)"))
+       y = expression(paste(Delta, "% CO"[3])))
 
 OTime <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -611,7 +612,4 @@ ggarrange(CGroup, CTime, CConc,
           OGroup, OTime,  OConc,
           CO3Group, CO3Time,  CO3Conc, 
           ncol = 3, nrow = 3)
-ggsave("Figures/Treatment2.pdf", dpi = 300)
-
-
-
+ggsave("Figures/Treatment2.pdf", dpi = 300, height = 6, width = 6, units = "in")
