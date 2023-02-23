@@ -25,7 +25,7 @@ psdata <- unique(psdata)
 # Pull apart comparative batches and create delta values
 
 CCFF <- psdata %>% filter(Tooth == "A" & Analysis == "1") %>% 
-  filter(Treat == "FF" | Treat == "CC") %>% 
+  filter(Treat == "CC" | Treat == "FF") %>% 
   mutate(Group = 'CCFF')
 CFFF <- psdata %>% filter(Tooth == "A" & Analysis == "2") %>% 
   filter(Treat == "CF" | Treat == "FF") %>% 
@@ -36,17 +36,17 @@ CCCF <- psdata %>% filter(Tooth == "B") %>%
 
 CCFFdelta <- CCFF %>%
   group_by(toothNumber) %>%
-  mutate(dC = dC[Treat == 'FF'] - dC[Treat == 'CC'], 
-         dO = dO[Treat == 'FF'] - dO[Treat == 'CC'], 
-         CO3 = CO3[Treat == 'FF'] - CO3[Treat == 'CC']) %>% 
+  mutate(dC = dC[Treat == 'CC'] - dC[Treat == 'FF'], 
+         dO = dO[Treat == 'CC'] - dO[Treat == 'FF'], 
+         CO3 = CO3[Treat == 'CC'] - CO3[Treat == 'FF']) %>% 
   distinct(toothNumber, .keep_all = T) %>% 
   select(-c(Sample, Tooth, Treat, Analysis))
 
 CFFFdelta <- CFFF %>%
   group_by(toothNumber) %>%
-  mutate(dC = dC[Treat == 'FF'] - dC[Treat == 'CF'], 
-         dO = dO[Treat == 'FF'] - dO[Treat == 'CF'], 
-         CO3 = CO3[Treat == 'FF'] - CO3[Treat == 'CF']) %>% 
+  mutate(dC = dC[Treat == 'CF'] - dC[Treat == 'FF'], 
+         dO = dO[Treat == 'CF'] - dO[Treat == 'FF'], 
+         CO3 = CO3[Treat == 'CF'] - CO3[Treat == 'FF']) %>% 
   distinct(toothNumber, .keep_all = T) %>% 
   select(-c(Sample, Tooth, Treat, Analysis))
 
@@ -72,16 +72,16 @@ shapiro.test(CCCFdelta$CO3)
 
 # No tests result in p < 0.05, we'll move forward with t-tests
 
+t.test(CCFFdelta$dC)
+t.test(CCFFdelta$dO)
+t.test(CCFFdelta$CO3)
+cohensD(CCFFdelta$CO3)
+
 t.test(CCCFdelta$dC)
 t.test(CCCFdelta$dO)
 cohensD(CCCFdelta$dO)
 t.test(CCCFdelta$CO3)
 cohensD(CCCFdelta$CO3)
-
-t.test(CCFFdelta$dC)
-t.test(CCFFdelta$dO)
-t.test(CCFFdelta$CO3)
-cohensD(CCFFdelta$CO3)
 
 t.test(CFFFdelta$dC)
 t.test(CFFFdelta$dO)
@@ -91,37 +91,43 @@ cohensD(CFFFdelta$CO3)
 # Particle Size Figures ---------------------------------------------------
 
 PartSizeC <- ggplot() + 
-  geom_boxplot(data = CCFF, aes(x = Group, y = dC, fill = Treat)) +
-  geom_boxplot(data = CFFF, aes(x = Group, y = dC, fill = Treat)) +
-  geom_boxplot(data = CCCF, aes(x = Group, y = dC, fill = Treat)) +
+  geom_hline(yintercept = 0, lty = 3) +
+  geom_boxplot(data = CCFFdelta, aes(x = Group, y = dC, fill = Group)) +
+  geom_boxplot(data = CFFFdelta, aes(x = Group, y = dC, fill = Group)) +
+  geom_boxplot(data = CCCFdelta, aes(x = Group, y = dC, fill = Group)) +
   scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
   labs(
     #  fill = "Particle Size", 
-    y = expression(paste(delta^13, "C", " (\u2030, VPDB)"))
+    x = "",
+    y = expression(paste(Delta^13, "C", " (\u2030, VPDB)"))
   ) + 
   theme_classic() + 
   theme(legend.position = 'none')
 
 PartSizeO <- ggplot() + 
-  geom_boxplot(data = CCFF, aes(x = Group, y = dO, fill = Treat)) +
-  geom_boxplot(data = CFFF, aes(x = Group, y = dO, fill = Treat)) +
-  geom_boxplot(data = CCCF, aes(x = Group, y = dO, fill = Treat)) +
+  geom_hline(yintercept = 0, lty = 3) +
+  geom_boxplot(data = CCFFdelta, aes(x = Group, y = dO, fill = Group)) +
+  geom_boxplot(data = CFFFdelta, aes(x = Group, y = dO, fill = Group)) +
+  geom_boxplot(data = CCCFdelta, aes(x = Group, y = dO, fill = Group)) +
   scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
   labs(
-    #   fill = "Particle Size", 
-    y = expression(paste(delta^18, "O", " (\u2030, VPDB)"))
+    #   fill = "Particle Size",
+    x = "",
+    y = expression(paste(Delta^18, "O", " (\u2030, VPDB)"))
   ) + 
   theme_classic() + 
   theme(legend.position = 'none')
 
 PartSizeCO3 <- ggplot() + 
-  geom_boxplot(data = CCFF, aes(x = Group, y = CO3, fill = Treat)) +
-  geom_boxplot(data = CFFF, aes(x = Group, y = CO3, fill = Treat)) +
-  geom_boxplot(data = CCCF, aes(x = Group, y = CO3, fill = Treat)) +
+  geom_hline(yintercept = 0, lty = 3) +
+  geom_boxplot(data = CCFFdelta, aes(x = Group, y = CO3, fill = Group)) +
+  geom_boxplot(data = CFFFdelta, aes(x = Group, y = CO3, fill = Group)) +
+  geom_boxplot(data = CCCFdelta, aes(x = Group, y = CO3, fill = Group)) +
   scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
   labs(
     #   fill = "Particle Size", 
-    y = expression(paste("% CO"[3]))
+    x = "",
+    y = expression(paste(Delta, "% CO"[3]))
   ) + 
   theme_classic() + 
   theme(legend.position = 'none')
@@ -138,7 +144,7 @@ scdata <- separate(StorageCondExp, "Sample ID", sep="-",into=c("SLC20","tooth",
 scdata$sample_id <- gsub("-", "", scdata$sample_id)
 
 ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>% 
-  group_by(sample_id) %>% 
+  group_by(tooth) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
@@ -146,23 +152,15 @@ ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>%
          location = "Cabinet")
 
 ambientT2 <- filter(scdata,AB=="A",Time=="T2") %>% 
-  group_by(sample_id) %>% 
+  group_by(tooth) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
   mutate(time = "71 Days", 
          location = "Cabinet")
 
-ambient <- rbind(ambientT1, ambientT2) %>% 
-  group_by(sample_id) %>% 
-  mutate(dC = dC[time == '37 Days'] - dC[time == '71 Days'], 
-         dO = dO[time == '37 Days'] - dO[time == '71 Days'], 
-         CO3 = CO3[time == '37 Days'] - CO3[time == '71 Days']) %>% 
-  distinct(sample_id, .keep_all = T) %>% 
-  select(-c(time))
-
 desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>% 
-  group_by(sample_id) %>% 
+  group_by(tooth) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
@@ -170,85 +168,67 @@ desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>%
          location = "Desiccator")
 
 desiccatorT2 <- filter(scdata,AB=="B",Time=="T2") %>% 
-  group_by(sample_id) %>% 
+  group_by(tooth) %>% 
   summarize(dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
   mutate(time = "71 Days", 
          location = "Desiccator")
 
-desiccator <- rbind(desiccatorT1, desiccatorT2) %>% 
-  group_by(sample_id) %>% 
-  mutate(dC = dC[time == '37 Days'] - dC[time == '71 Days'], 
-         dO = dO[time == '37 Days'] - dO[time == '71 Days'], 
-         CO3 = CO3[time == '37 Days'] - CO3[time == '71 Days']) %>% 
-  distinct(sample_id, .keep_all = T) %>% 
-  select(-c(time))
+T1 <- rbind(ambientT1, desiccatorT1) %>% 
+  group_by(tooth) %>% 
+  mutate(dC = dC[location == 'Cabinet'] - dC[location == 'Desiccator'], 
+         dO = dO[location == 'Cabinet'] - dO[location == 'Desiccator'], 
+         CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
+  distinct(tooth, .keep_all = T) %>% 
+  select(-c(location))
 
-storage <- rbind(ambient, desiccator)
+T2 <- rbind(ambientT2, desiccatorT2) %>% 
+  group_by(tooth) %>% 
+  mutate(dC = dC[location == 'Cabinet'] - dC[location == 'Desiccator'], 
+         dO = dO[location == 'Cabinet'] - dO[location == 'Desiccator'], 
+         CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
+  distinct(tooth, .keep_all = T) %>% 
+  select(-c(location))
 
 # Testing for normality
 
-shapiro.test(storage$dC)
-shapiro.test(storage$dO)
-shapiro.test(storage$CO3)
+shapiro.test(T1$dC)
+shapiro.test(T1$dO)
+shapiro.test(T1$CO3)
+
+shapiro.test(T2$dC)
+shapiro.test(T2$dO)
+shapiro.test(T2$CO3)
 
 # T-tests
 
-t.test(storage$dC)
-t.test(storage$dO)
-t.test(storage$CO3)
-cohensD(storage$CO3)
+t.test(T1$dC)
+t.test(T1$dO)
+t.test(T1$CO3)
 
-# Setting up to compare storage conditions
-
-ambientT1$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
-ambientT2$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
-desiccatorT1$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
-desiccatorT2$sample_id <- str_replace_all(ambientT1$sample_id, c('A' = '', 'B' = ''))
-
-T1 <- rbind(ambientT1, desiccatorT1) %>% 
-  group_by(sample_id) %>% 
-  mutate(dC = dC[location == 'Cabinet'] - dC[location == 'Desiccator'], 
-         dO = dO[location == 'Cabinet'] - dO[location == 'Desiccator'], 
-         CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
-  distinct(sample_id, .keep_all = T) %>% 
-  select(-c(location))  
-
-T2 <- rbind(ambientT2, desiccatorT2) %>% 
-  group_by(sample_id) %>% 
-  mutate(dC = dC[location == 'Cabinet'] - dC[location == 'Desiccator'], 
-         dO = dO[location == 'Cabinet'] - dO[location == 'Desiccator'], 
-         CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
-  distinct(sample_id, .keep_all = T) %>% 
-  select(-c(location))  
-
-storage2 <- rbind(T1, T2)
-
-# Are the data normally distributed? 
-
-shapiro.test(storage2$dC)
-shapiro.test(storage2$dO)
-shapiro.test(storage2$CO3)
-
-# Tests
-t.test(storage2$dC)
-wilcox.test(storage2$dO)
-t.test(storage2$CO3)
+t.test(T2$dC)
+wilcox.test(T2$dO)
+t.test(T2$CO3)
 
 
 # Storage Conditions Figures ----------------------------------------------
 # probably not used in the publication, but useful for quick examination
 
+storage2 <- rbind(T1, T2)
+
 ggplot(data = storage2, aes(x = time, y = dC)) + 
+  geom_hline(yintercept = 0, lty = 3) +
   geom_boxplot() + 
   theme_classic()
 
 ggplot(data = storage2, aes(x = time, y = dO)) + 
+  geom_hline(yintercept = 0, lty = 3) +
   geom_boxplot() + 
   theme_classic()
 
 ggplot(data = storage2, aes(x = time, y = CO3)) + 
+  geom_hline(yintercept = 0, lty = 3) +
   geom_boxplot() + 
   theme_classic()
 
@@ -301,6 +281,10 @@ for(i in 1:length(TT)){
   samps$n[i] = sum(d$TT == TT[i], na.rm = TRUE)
 }
 
+# Turn CO3 yields into percent values
+samps$CO3.m = samps$CO3.m * 100
+samps$CO3.sd = samps$CO3.sd * 100
+
 # Offsets
 samps$d18O.sd.off = samps$d13C.sd.off = samps$d18O.m.off = samps$d13C.m.off = 
   samps$CO3.m.off = samps$CO3.sd.off =rep(0)
@@ -351,8 +335,37 @@ samps$Treat <- gsub("I2", "Control", samps$Treat)
 samps$Treat <- gsub("I", "Control", samps$Treat)
 
 # Combining repeat measures?
-t.test(subset(samps, Treat == "F")$d18O.m, subset(samps, Treat == "F2")$d18O.m)
-t.test(subset(samps, Treat == "G")$d18O.m, subset(samps, Treat == "G2")$d18O.m)
+F12 <- samps %>% 
+  group_by(Tooth) %>% 
+  mutate(dC = d13C.m.off[Treat == 'F2'] - d13C.m.off[Treat == 'F'], 
+         dO = d18O.m.off[Treat == 'F2'] - d18O.m.off[Treat == 'F'], 
+         CO3 = CO3.m.off[Treat == 'F2'] - CO3.m.off[Treat == 'F']) %>% 
+  distinct(Tooth, .keep_all = T) %>% 
+  select(-c(Treat))
+
+G12 <- samps %>% 
+  group_by(Tooth) %>% 
+  mutate(dC = d13C.m.off[Treat == 'G2'] - d13C.m.off[Treat == 'G'], 
+         dO = d18O.m.off[Treat == 'G2'] - d18O.m.off[Treat == 'G'], 
+         CO3 = CO3.m.off[Treat == 'G2'] - CO3.m.off[Treat == 'G']) %>% 
+  distinct(Tooth, .keep_all = T) %>% 
+  select(-c(Treat))
+
+shapiro.test(F12$dC)
+shapiro.test(F12$dO)
+shapiro.test(F12$CO3)
+
+shapiro.test(G12$dC)
+shapiro.test(G12$dO)
+shapiro.test(G12$CO3)
+
+t.test(F12$dC)
+t.test(F12$dO)
+t.test(F12$CO3)
+
+t.test(G12$dC)
+t.test(G12$dO)
+t.test(G12$CO3)
 
 # WARNING: while the control was labeled "I" in the original dataset, 
 # I'm labeling "No oxidative treatment, buffered acetic acid 15 min" as "I" to continue the lettering scheme
@@ -362,26 +375,44 @@ df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
 
 # Testing for normality
 
-shapiro.test(subset(df, Treat != 'Control')$d13C.m.off)
-shapiro.test(subset(df, Treat != 'Control')$d18O.m.off)
-shapiro.test(subset(df, Treat != 'Control')$CO3.m.off)
+treats = sort(unique(df$Treat))
+treats = treats[treats != "Control"]
+shapTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
+datacols = c("d13C.m.off", "d18O.m.off", "CO3.m.off")
 
-# As d13C.m.off are not normally distributed, we should use non-parametric tests
+for(i in seq_along(treats)){
+  for(j in 1:3){
+    shapTable[i, j+1] = shapiro.test(df[df$Treat == treats[i], datacols[j]])$p.value
+  }
+}
 
-kruskal.test(d13C.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J"))
-summary(aov(d18O.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J")))
+# Stats for all
 
-summary(aov(CO3.m.off ~ Treat, data = subset(df, Treat != "I" & Treat != "J")))
+diffTable = statTable = pTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
 
-mean(subset(df, Treat != "I" & Treat != "J" & Treat != "Control")$d13C.m.off)
-sd(subset(df, Treat != "I" & Treat != "J" & Treat != "Control")$d13C.m.off)
+for(i in seq_along(treats)){
+  for(j in 1:3){
+    if(shapTable[i, j+1] > 0.05){
+      test = t.test(df[df$Treat == treats[i], datacols[j]])
+      diffTable[i, j+1] = test$estimate
+      statTable[i, j+1] = test$statistic
+      pTable[i, j+1] = test$p.value
+    }else{
+      test = wilcox.test(df[df$Treat == treats[i], datacols[j]])
+      diffTable[i, j+1] = mean(df[df$Treat == treats[i], datacols[j]])
+      statTable[i, j+1] = test$statistic
+      pTable[i, j+1] = test$p.value
+    }
+  }
+}
 
-mean(subset(df, Treat != "I" & Treat != "J" & Treat != "Control")$d18O.m.off)
-sd(subset(df, Treat != "I" & Treat != "J" & Treat != "Control")$d18O.m.off)
+shapTable
+pTable
+diffTable
+statTable
 
-mean(subset(df, Treat == "J")$d18O.m.off)
-sd(subset(df, Treat == "J")$d18O.m.off)
-t.test(d18O.m.off ~ Treat, data = subset(df, Treat == "Control" | Treat == "J"))
+mean(diffTable[1:8, "dO"])
+mean(diffTable[pTable$dO < 0.05, "dO"])
 
 # Is there a difference between NaOCl and H2O2, regardless of time?
 df <- df %>% mutate(Group =
