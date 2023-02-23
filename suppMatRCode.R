@@ -88,6 +88,9 @@ t.test(CFFFdelta$dO)
 t.test(CFFFdelta$CO3)
 cohensD(CFFFdelta$CO3)
 
+shapiro.test(c(CCFFdelta$dO, CCCFdelta$dO))
+t.test(c(CCFFdelta$dO, CCCFdelta$dO))
+
 # Particle Size Figures ---------------------------------------------------
 
 PartSizeC <- ggplot() + 
