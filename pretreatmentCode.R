@@ -88,9 +88,9 @@ t.test(c(CCFFdelta$dO, CCCFdelta$dO))
 
 PartSizeC <- ggplot() + 
   geom_hline(yintercept = 0, lty = 3) +
-  geom_boxplot(data = CCFFdelta, aes(x = Group, y = dC, fill = Group)) +
-  geom_boxplot(data = CFFFdelta, aes(x = Group, y = dC, fill = Group)) +
-  geom_boxplot(data = CCCFdelta, aes(x = Group, y = dC, fill = Group)) +
+  geom_boxplot(data = CCFFdelta, aes(x = Trial, y = dC, fill = Trial)) +
+  geom_boxplot(data = CFFFdelta, aes(x = Trial, y = dC, fill = Trial)) +
+  geom_boxplot(data = CCCFdelta, aes(x = Trial, y = dC, fill = Trial)) +
   scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
   labs(
     #  fill = "Particle Size", 
@@ -99,15 +99,15 @@ PartSizeC <- ggplot() +
   ) + 
   theme_classic() + 
   theme(legend.position = "none", 
-        axis.text.x = element_text(size = 12),
+        axis.text.x = element_text(size = 8),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 12))
 
 PartSizeO <- ggplot() + 
   geom_hline(yintercept = 0, lty = 3) +
-  geom_boxplot(data = CCFFdelta, aes(x = Group, y = dO, fill = Group)) +
-  geom_boxplot(data = CFFFdelta, aes(x = Group, y = dO, fill = Group)) +
-  geom_boxplot(data = CCCFdelta, aes(x = Group, y = dO, fill = Group)) +
+  geom_boxplot(data = CCFFdelta, aes(x = Trial, y = dO, fill = Trial)) +
+  geom_boxplot(data = CFFFdelta, aes(x = Trial, y = dO, fill = Trial)) +
+  geom_boxplot(data = CCCFdelta, aes(x = Trial, y = dO, fill = Trial)) +
   scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
   labs(
     #   fill = "Particle Size",
@@ -116,15 +116,15 @@ PartSizeO <- ggplot() +
   ) + 
   theme_classic() + 
   theme(legend.position = "none", 
-        axis.text.x = element_text(size = 12),
+        axis.text.x = element_text(size = 8),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 12))
 
 PartSizeCO3 <- ggplot() + 
   geom_hline(yintercept = 0, lty = 3) +
-  geom_boxplot(data = CCFFdelta, aes(x = Group, y = CO3, fill = Group)) +
-  geom_boxplot(data = CFFFdelta, aes(x = Group, y = CO3, fill = Group)) +
-  geom_boxplot(data = CCCFdelta, aes(x = Group, y = CO3, fill = Group)) +
+  geom_boxplot(data = CCFFdelta, aes(x = Trial, y = CO3, fill = Trial)) +
+  geom_boxplot(data = CFFFdelta, aes(x = Trial, y = CO3, fill = Trial)) +
+  geom_boxplot(data = CCCFdelta, aes(x = Trial, y = CO3, fill = Trial)) +
   scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
   labs(
     #   fill = "Particle Size", 
@@ -133,12 +133,12 @@ PartSizeCO3 <- ggplot() +
   ) + 
   theme_classic() + 
   theme(legend.position = "none", 
-        axis.text.x = element_text(size = 12),
+        axis.text.x = element_text(size = 8),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 12))
 
 ggarrange(PartSizeC, PartSizeO, PartSizeCO3, nrow = 1)
-ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 6, height = 3,
+ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 6, height = 2.7,
        units = c("in"))
 
 # Storage Conditions Statistics--------------------------------------------
@@ -471,7 +471,7 @@ graphs <- subset(df, Treat!= 'Control')
 palette <- c( "#668C99","#306879", "#FD9C86", "#F47A60", "#668C99","#306879",
                        "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7")
                        
-palette2 <- c("bisque1", "midnightblue")
+palette2 <- c("#E4d5b7", "#306879")
 
 O <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
