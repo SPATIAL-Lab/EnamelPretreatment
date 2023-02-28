@@ -108,7 +108,7 @@ PartSizeC <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 12))
 
 PartSizeO <- ggplot() + 
   geom_hline(yintercept = 0, lty = 3) +
@@ -125,7 +125,7 @@ PartSizeO <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 12))
 
 PartSizeCO3 <- ggplot() + 
   geom_hline(yintercept = 0, lty = 3) +
@@ -142,10 +142,10 @@ PartSizeCO3 <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 12))
 
 ggarrange(PartSizeC, PartSizeO, PartSizeCO3, nrow = 1)
-ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 6, height = 3,
+ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 6, height = 2.8,
        units = c("in"))
 
 # Storage Conditions Statistics--------------------------------------------
@@ -467,7 +467,7 @@ graphs <- subset(df, Treat!= 'Control')
 palette <- c( "#668C99","#306879", "#FD9C86", "#F47A60", "#668C99","#306879",
                        "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7")
                        
-palette2 <- c("bisque1", "midnightblue")
+palette2 <- c("#E4d5b7", "#306879")
 
 O <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -520,7 +520,7 @@ OGroup <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Oxidant Treatment", 
        y = expression(paste(Delta^18, "O", " (\u2030, VPDB)")))
 
@@ -532,7 +532,7 @@ CGroup <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Oxidant Treatment", 
        y = expression(paste(Delta^13, "C", " (\u2030, VPDB)")))
 
@@ -544,7 +544,7 @@ CO3Group <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Oxidant Treatment", 
        y = expression(paste(Delta, "% CO"[3])))
 
@@ -556,7 +556,7 @@ OTime <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Time", 
        y = "")
 
@@ -568,7 +568,7 @@ CTime <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Time", 
        y = "")
 
@@ -580,7 +580,7 @@ CO3Time <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Time", 
        y = "")
 
@@ -592,7 +592,7 @@ OConc <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Concentration", 
        y = "")
 
@@ -604,7 +604,7 @@ CConc <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Concentration", 
        y = "")
 
@@ -616,7 +616,7 @@ CO3Conc <- ggplot() +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 14), ) +
+        axis.title = element_text(size = 12), ) +
   labs(x = "Concentration", 
        y = "")
 
