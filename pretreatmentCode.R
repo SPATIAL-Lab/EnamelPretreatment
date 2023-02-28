@@ -11,28 +11,25 @@ usePackage("readxl");usePackage("tidyverse"); usePackage("lsr"); usePackage("ggp
 
 # Particle Size Statistics ------------------------------------------------
 
-psdata <- read_excel("data/ParticleSizeExp1.xlsx")
+psdata <- read_excel("data/ParticleSize.xlsx")
 
 # Aggregate Replicates
 
 psdata <- psdata %>% group_by(Sample) %>% 
-  mutate(dC = mean(dC), 
-            dO = mean(dO), 
-            CO3 = mean(CO3)) %>% 
-  ungroup()
+  mutate(dC.sd = sd(dC),
+         dO.sd = sd(dO),
+         CO3.sd = sd(CO3),
+         dC = mean(dC),
+         dO = mean(dO),
+         CO3 = mean(CO3),
+         Weight = NULL)
 psdata <- unique(psdata)
 
 # Pull apart comparative batches and create delta values
 
-CCFF <- psdata %>% filter(Tooth == "A" & Analysis == "1") %>% 
-  filter(Treat == "CC" | Treat == "FF") %>% 
-  mutate(Group = 'CCFF')
-CFFF <- psdata %>% filter(Tooth == "A" & Analysis == "2") %>% 
-  filter(Treat == "CF" | Treat == "FF") %>% 
-  mutate(Group = 'CFFF')
-CCCF <- psdata %>% filter(Tooth == "B") %>% 
-  filter(Treat == "CC" | Treat == "CF") %>% 
-  mutate(Group = 'CCCF')
+CCFF <- psdata %>% filter(Trial == "CCFF")
+CFFF <- psdata %>% filter(Trial == "CFFF")
+CCCF <- psdata %>% filter(Trial == "CCCF")
 
 CCFFdelta <- CCFF %>%
   group_by(toothNumber) %>%
@@ -40,7 +37,7 @@ CCFFdelta <- CCFF %>%
          dO = dO[Treat == 'CC'] - dO[Treat == 'FF'], 
          CO3 = CO3[Treat == 'CC'] - CO3[Treat == 'FF']) %>% 
   distinct(toothNumber, .keep_all = T) %>% 
-  select(-c(Sample, Tooth, Treat, Analysis))
+  select(-c(Sample, Treat, dC.sd, dO.sd, CO3.sd))
 
 CFFFdelta <- CFFF %>%
   group_by(toothNumber) %>%
@@ -48,7 +45,7 @@ CFFFdelta <- CFFF %>%
          dO = dO[Treat == 'CF'] - dO[Treat == 'FF'], 
          CO3 = CO3[Treat == 'CF'] - CO3[Treat == 'FF']) %>% 
   distinct(toothNumber, .keep_all = T) %>% 
-  select(-c(Sample, Tooth, Treat, Analysis))
+  select(-c(Sample, Treat, dC.sd, dO.sd, CO3.sd))
 
 CCCFdelta <- CCCF %>%
   group_by(toothNumber) %>%
@@ -56,7 +53,7 @@ CCCFdelta <- CCCF %>%
          dO = dO[Treat == 'CC'] - dO[Treat == 'CF'], 
          CO3 = CO3[Treat == 'CC'] - CO3[Treat == 'CF']) %>% 
   distinct(toothNumber, .keep_all = T) %>% 
-  select(-c(Sample, Tooth, Treat, Analysis))
+  select(-c(Sample, Treat, dC.sd, dO.sd, CO3.sd))
 
 # Testing for normality
 
@@ -75,18 +72,14 @@ shapiro.test(CCCFdelta$CO3)
 t.test(CCFFdelta$dC)
 t.test(CCFFdelta$dO)
 t.test(CCFFdelta$CO3)
-cohensD(CCFFdelta$CO3)
 
 t.test(CCCFdelta$dC)
 t.test(CCCFdelta$dO)
-cohensD(CCCFdelta$dO)
 t.test(CCCFdelta$CO3)
-cohensD(CCCFdelta$CO3)
 
 t.test(CFFFdelta$dC)
 t.test(CFFFdelta$dO)
 t.test(CFFFdelta$CO3)
-cohensD(CFFFdelta$CO3)
 
 shapiro.test(c(CCFFdelta$dO, CCCFdelta$dO))
 t.test(c(CCFFdelta$dO, CCCFdelta$dO))
@@ -158,7 +151,10 @@ scdata$sample_id <- gsub("-", "", scdata$sample_id)
 
 ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>% 
   group_by(tooth) %>% 
-  summarize(dC = mean(dC), 
+  summarize(dC.sd = sd(dC),
+            dO.sd = sd(dO),
+            CO3.sd = sd(CO3),
+            dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
   mutate(time = "37 Days", 
@@ -166,7 +162,10 @@ ambientT1 <- filter(scdata,AB=="A",Time=="T1") %>%
 
 ambientT2 <- filter(scdata,AB=="A",Time=="T2") %>% 
   group_by(tooth) %>% 
-  summarize(dC = mean(dC), 
+  summarize(dC.sd = sd(dC),
+            dO.sd = sd(dO),
+            CO3.sd = sd(CO3),
+            dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
   mutate(time = "71 Days", 
@@ -174,7 +173,10 @@ ambientT2 <- filter(scdata,AB=="A",Time=="T2") %>%
 
 desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>% 
   group_by(tooth) %>% 
-  summarize(dC = mean(dC), 
+  summarize(dC.sd = sd(dC),
+            dO.sd = sd(dO),
+            CO3.sd = sd(CO3),
+            dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
   mutate(time = "37 Days", 
@@ -182,7 +184,10 @@ desiccatorT1 <- filter(scdata,AB=="B",Time=="T1") %>%
 
 desiccatorT2 <- filter(scdata,AB=="B",Time=="T2") %>% 
   group_by(tooth) %>% 
-  summarize(dC = mean(dC), 
+  summarize(dC.sd = sd(dC),
+            dO.sd = sd(dO),
+            CO3.sd = sd(CO3),
+            dC = mean(dC), 
             dO = mean(dO), 
             CO3 = mean(CO3)) %>%  
   mutate(time = "71 Days", 
@@ -194,7 +199,7 @@ T1 <- rbind(ambientT1, desiccatorT1) %>%
          dO = dO[location == 'Cabinet'] - dO[location == 'Desiccator'], 
          CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
   distinct(tooth, .keep_all = T) %>% 
-  select(-c(location))
+  select(-c(location, dC.sd, dO.sd, CO3.sd))
 
 T2 <- rbind(ambientT2, desiccatorT2) %>% 
   group_by(tooth) %>% 
@@ -202,7 +207,7 @@ T2 <- rbind(ambientT2, desiccatorT2) %>%
          dO = dO[location == 'Cabinet'] - dO[location == 'Desiccator'], 
          CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
   distinct(tooth, .keep_all = T) %>% 
-  select(-c(location))
+  select(-c(location, dC.sd, dO.sd, CO3.sd))
 
 # Testing for normality
 
@@ -276,65 +281,64 @@ d = d[d$Identifier_1 != "C5-A-3",]
 
 TT = unique(d$TT)
 
-samps = data.frame(TT, "d13C.m" = rep(0), "d13C.sd" = rep(0),
-                   "d18O.m" = rep(0), "d18O.sd" = rep(0), "n" = rep(0), 
-                   "CO3.m" = rep(0), "CO3.sd" = rep(0)
+samps = data.frame(TT, "dC" = rep(0), "dC.sd" = rep(0),
+                   "dO" = rep(0), "dO.sd" = rep(0), "n" = rep(0), 
+                   "CO3" = rep(0), "CO3.sd" = rep(0)
 )
 samps$Tooth = d$Tooth[match(samps$TT, d$TT)]
 samps$Treat = d$Treat[match(samps$TT, d$TT)]
 
 # Sample averages
 for(i in 1:length(TT)){
-  samps$d13C.m[i] = mean(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
-  samps$d13C.sd[i] = sd(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
-  samps$d18O.m[i] = mean(d$d18O.cal[d$TT == TT[i]], na.rm = TRUE)
-  samps$d18O.sd[i] = sd(d$d18O.cal[d$TT == TT[i]], na.rm = TRUE)
-  samps$CO3.m[i] = mean(d$pCO3[d$TT == TT[i]], na.rm = TRUE)
+  samps$dC[i] = mean(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
+  samps$dC.sd[i] = sd(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
+  samps$dO[i] = mean(d$d18O.cal[d$TT == TT[i]], na.rm = TRUE)
+  samps$dO.sd[i] = sd(d$d18O.cal[d$TT == TT[i]], na.rm = TRUE)
+  samps$CO3[i] = mean(d$pCO3[d$TT == TT[i]], na.rm = TRUE)
   samps$CO3.sd[i] = sd(d$pCO3[d$TT == TT[i]], na.rm = TRUE)
   samps$n[i] = sum(d$TT == TT[i], na.rm = TRUE)
 }
 
 # Turn CO3 yields into percent values
-samps$CO3.m = samps$CO3.m * 100
+samps$CO3 = samps$CO3 * 100
 samps$CO3.sd = samps$CO3.sd * 100
 
 # Offsets
-samps$d18O.sd.off = samps$d13C.sd.off = samps$d18O.m.off = samps$d13C.m.off = 
-  samps$CO3.m.off = samps$CO3.sd.off =rep(0)
+samps$dO.sd.off = samps$dC.sd.off = samps$dO.off = samps$dC.off = 
+  samps$CO3.off = samps$CO3.sd.off =rep(0)
 
 sid = unique(samps$Tooth)
 for(i in sid){
-  samps$d13C.m.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
-    samps$d13C.m[samps$Tooth == i & nchar(samps$Treat) == 1] - 
-    samps$d13C.m[samps$Tooth == i & samps$Treat == "I"]
-  samps$d18O.m.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
-    samps$d18O.m[samps$Tooth == i & nchar(samps$Treat) == 1] - 
-    samps$d18O.m[samps$Tooth == i & samps$Treat == "I"]
-  samps$d13C.sd.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
-    samps$d13C.sd[samps$Tooth == i & nchar(samps$Treat) == 1] - 
-    samps$d13C.sd[samps$Tooth == i & samps$Treat == "I"]
-  samps$d18O.sd.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
-    samps$d18O.sd[samps$Tooth == i & nchar(samps$Treat) == 1] - 
-    samps$d18O.sd[samps$Tooth == i & samps$Treat == "I"]
-  samps$d13C.m.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
-    samps$d13C.m[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d13C.m[samps$Tooth == i & samps$Treat == "I2"]
-  samps$d18O.m.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
-    samps$d18O.m[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d18O.m[samps$Tooth == i & samps$Treat == "I2"]
-  samps$d13C.sd.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
-    samps$d13C.sd[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d13C.sd[samps$Tooth == i & samps$Treat == "I2"]
-  samps$d18O.sd.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
-    samps$d18O.sd[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$d18O.sd[samps$Tooth == i & samps$Treat == "I2"]
-  #where I keep faking it til I make it
-  samps$CO3.m.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
-    samps$CO3.m[samps$Tooth == i & nchar(samps$Treat) == 1] - 
-    samps$CO3.m[samps$Tooth == i & samps$Treat == "I"]  
-  samps$CO3.m.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
-    samps$CO3.m[samps$Tooth == i & nchar(samps$Treat) == 2] - 
-    samps$CO3.m[samps$Tooth == i & samps$Treat == "I2"]  
+  samps$dC.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
+    samps$dC[samps$Tooth == i & nchar(samps$Treat) == 1] - 
+    samps$dC[samps$Tooth == i & samps$Treat == "I"]
+  samps$dO.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
+    samps$dO[samps$Tooth == i & nchar(samps$Treat) == 1] - 
+    samps$dO[samps$Tooth == i & samps$Treat == "I"]
+  samps$dC.sd.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
+    samps$dC.sd[samps$Tooth == i & nchar(samps$Treat) == 1] - 
+    samps$dC.sd[samps$Tooth == i & samps$Treat == "I"]
+  samps$dO.sd.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
+    samps$dO.sd[samps$Tooth == i & nchar(samps$Treat) == 1] - 
+    samps$dO.sd[samps$Tooth == i & samps$Treat == "I"]
+  samps$dC.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
+    samps$dC[samps$Tooth == i & nchar(samps$Treat) == 2] - 
+    samps$dC[samps$Tooth == i & samps$Treat == "I2"]
+  samps$dO.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
+    samps$dO[samps$Tooth == i & nchar(samps$Treat) == 2] - 
+    samps$dO[samps$Tooth == i & samps$Treat == "I2"]
+  samps$dC.sd.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
+    samps$dC.sd[samps$Tooth == i & nchar(samps$Treat) == 2] - 
+    samps$dC.sd[samps$Tooth == i & samps$Treat == "I2"]
+  samps$dO.sd.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
+    samps$dO.sd[samps$Tooth == i & nchar(samps$Treat) == 2] - 
+    samps$dO.sd[samps$Tooth == i & samps$Treat == "I2"]
+  samps$CO3.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
+    samps$CO3[samps$Tooth == i & nchar(samps$Treat) == 1] - 
+    samps$CO3[samps$Tooth == i & samps$Treat == "I"]  
+  samps$CO3.off[samps$Tooth == i & nchar(samps$Treat) == 2] = 
+    samps$CO3[samps$Tooth == i & nchar(samps$Treat) == 2] - 
+    samps$CO3[samps$Tooth == i & samps$Treat == "I2"]  
   samps$CO3.sd.off[samps$Tooth == i & nchar(samps$Treat) == 1] = 
     samps$CO3.sd[samps$Tooth == i & nchar(samps$Treat) == 1] - 
     samps$CO3.sd[samps$Tooth == i & samps$Treat == "I"]
@@ -350,17 +354,17 @@ samps$Treat <- gsub("I", "Control", samps$Treat)
 # Combining repeat measures?
 F12 <- samps %>% 
   group_by(Tooth) %>% 
-  mutate(dC = d13C.m.off[Treat == 'F2'] - d13C.m.off[Treat == 'F'], 
-         dO = d18O.m.off[Treat == 'F2'] - d18O.m.off[Treat == 'F'], 
-         CO3 = CO3.m.off[Treat == 'F2'] - CO3.m.off[Treat == 'F']) %>% 
+  mutate(dC = dC.off[Treat == 'F2'] - dC.off[Treat == 'F'], 
+         dO = dO.off[Treat == 'F2'] - dO.off[Treat == 'F'], 
+         CO3 = CO3.off[Treat == 'F2'] - CO3.off[Treat == 'F']) %>% 
   distinct(Tooth, .keep_all = T) %>% 
   select(-c(Treat))
 
 G12 <- samps %>% 
   group_by(Tooth) %>% 
-  mutate(dC = d13C.m.off[Treat == 'G2'] - d13C.m.off[Treat == 'G'], 
-         dO = d18O.m.off[Treat == 'G2'] - d18O.m.off[Treat == 'G'], 
-         CO3 = CO3.m.off[Treat == 'G2'] - CO3.m.off[Treat == 'G']) %>% 
+  mutate(dC = dC.off[Treat == 'G2'] - dC.off[Treat == 'G'], 
+         dO = dO.off[Treat == 'G2'] - dO.off[Treat == 'G'], 
+         CO3 = CO3.off[Treat == 'G2'] - CO3.off[Treat == 'G']) %>% 
   distinct(Tooth, .keep_all = T) %>% 
   select(-c(Treat))
 
@@ -391,7 +395,7 @@ df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
 treats = sort(unique(df$Treat))
 treats = treats[treats != "Control"]
 shapTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
-datacols = c("d13C.m.off", "d18O.m.off", "CO3.m.off")
+datacols = c("dC.off", "dO.off", "CO3.off")
 
 for(i in seq_along(treats)){
   for(j in 1:3){
@@ -434,9 +438,9 @@ df <- df %>% mutate(Group =
                       )
 )
 
-t.test(df$d13C.m.off ~ df$Group)
-t.test(df$d18O.m.off ~ df$Group)
-t.test(df$CO3.m.off ~ df$Group)
+t.test(df$dC.off ~ df$Group)
+t.test(df$dO.off ~ df$Group)
+t.test(df$CO3.off ~ df$Group)
 
 # Is there a difference between time of exposure to the oxidative treatment (15m versus 24h), regardless of solution used?
 df <- df %>% mutate(Time =
@@ -444,9 +448,9 @@ df <- df %>% mutate(Time =
                                 Treat == "E" | Treat == "F" | Treat == "G" | Treat == "H" ~ "24h")
 )
 
-t.test(df$d13C.m.off ~ df$Time)
-t.test(df$d18O.m.off ~ df$Time)
-t.test(df$CO3.m.off ~ df$Time)
+t.test(df$dC.off ~ df$Time)
+t.test(df$dO.off ~ df$Time)
+t.test(df$CO3.off ~ df$Time)
 # ALMOST significant in terms of changing oxygen values (unsurprising?) but not quite. 
 # 24 hours saw mean values of 0.48 offset, compared to 0.31 mean for 15 min group.
 
@@ -457,9 +461,9 @@ df <- df %>% mutate(Conc =
                       )
 )
 
-t.test(df$d13C.m.off ~ df$Conc)
-t.test(df$d18O.m.off ~ df$Conc)
-t.test(df$CO3.m.off ~ df$Conc)
+t.test(df$dC.off ~ df$Conc)
+t.test(df$dO.off ~ df$Conc)
+t.test(df$CO3.off ~ df$Conc)
 #no significant values there either
 
 # Chemical Treatment Figures---------------------------------------------------
@@ -471,7 +475,7 @@ palette2 <- c("#E4d5b7", "#306879")
 
 O <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = graphs, aes(x = Treat, y = d18O.m.off, fill = Treat, color = Time)) + 
+  geom_boxplot(data = graphs, aes(x = Treat, y = dO.off, fill = Treat, color = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette) +
   scale_color_manual(values = c("#F05039", "#1F449C")) +
@@ -484,7 +488,7 @@ O <- ggplot() +
 
 C <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = graphs, aes(x = Treat, y = d13C.m.off, fill = Treat, color = Time)) + 
+  geom_boxplot(data = graphs, aes(x = Treat, y = dC.off, fill = Treat, color = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette) +
   scale_color_manual(values = c("#F05039", "#1F449C")) +
@@ -497,7 +501,7 @@ C <- ggplot() +
 
 CO3 <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = graphs, aes(x = Treat, y = CO3.m.off, fill = Treat, color = Time)) + 
+  geom_boxplot(data = graphs, aes(x = Treat, y = CO3.off, fill = Treat, color = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette) +
   scale_color_manual(values = c("#F05039", "#1F449C")) +
@@ -514,7 +518,7 @@ ggsave("Figures/Treatment.pdf", dpi = 300, width = 6, height = 5, units = c('in'
 
 OGroup <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Group)), aes(x = Group, y = d18O.m.off, fill = Group)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Group)), aes(x = Group, y = dO.off, fill = Group)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -526,7 +530,7 @@ OGroup <- ggplot() +
 
 CGroup <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Group)), aes(x = Group, y = d13C.m.off, fill = Group)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Group)), aes(x = Group, y = dC.off, fill = Group)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -538,7 +542,7 @@ CGroup <- ggplot() +
 
 CO3Group <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Group)), aes(x = Group, y = CO3.m.off, fill = Group)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Group)), aes(x = Group, y = CO3.off, fill = Group)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -550,7 +554,7 @@ CO3Group <- ggplot() +
 
 OTime <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Time, y = d18O.m.off, fill = Time)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Time, y = dO.off, fill = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -562,7 +566,7 @@ OTime <- ggplot() +
 
 CTime <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Time, y = d13C.m.off, fill = Time)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Time, y = dC.off, fill = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -574,7 +578,7 @@ CTime <- ggplot() +
 
 CO3Time <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Time, y = CO3.m.off, fill = Time)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Time, y = CO3.off, fill = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -586,7 +590,7 @@ CO3Time <- ggplot() +
 
 OConc <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Conc, y = d18O.m.off, fill = Conc)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Conc, y = dO.off, fill = Conc)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -598,7 +602,7 @@ OConc <- ggplot() +
 
 CConc <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Conc, y = d13C.m.off, fill = Conc)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Conc, y = dC.off, fill = Conc)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -610,7 +614,7 @@ CConc <- ggplot() +
 
 CO3Conc <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
-  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Conc, y = CO3.m.off, fill = Conc)) + 
+  geom_boxplot(data = subset(graphs, !is.na(Time)), aes(x = Conc, y = CO3.off, fill = Conc)) + 
   theme_classic() +
   scale_fill_manual(values = palette2) +
   theme(legend.position = "none", 
@@ -625,3 +629,10 @@ ggarrange(CGroup, CTime, CConc,
           CO3Group, CO3Time,  CO3Conc, 
           ncol = 3, nrow = 3)
 ggsave("Figures/Treatment2.pdf", dpi = 300, height = 6, width = 6, units = "in")
+
+# Replicate SD across all trials
+
+mean(c(psdata$dC.sd, ambientT1$dC.sd, ambientT1$dC.sd, desiccatorT1$dC.sd,
+       desiccatorT2$dC.sd, samps$dC.sd))
+mean(c(psdata$dO.sd, ambientT1$dO.sd, ambientT1$dO.sd, desiccatorT1$dO.sd,
+       desiccatorT2$dO.sd, samps$dO.sd))
