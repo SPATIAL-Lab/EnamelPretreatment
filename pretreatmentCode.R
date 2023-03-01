@@ -1,15 +1,14 @@
-# This supplementary .R file contains all R code needed to run the statistical 
-# tests and create the base R figures as part of this publication. Please note 
-# that some figures were altered post-R in Adobe Illustrator. 
+# This makes the figures color swatched for the 2023 AABA poster
 
-usePackage <- function(p) {
-  if (!is.element(p, installed.packages()[,1]))
-    install.packages(p, dep = TRUE)
-  require(p, character.only = TRUE)
-}
-usePackage("readxl");usePackage("tidyverse"); usePackage("lsr"); usePackage("ggpubr")
+library("readxl");library("tidyverse"); library("lsr"); library("ggpubr"); 
+library("viridis")
 
-# Particle Size Statistics ------------------------------------------------
+palette <- c( "#962fbf","purple3", "#fa7e1e", "#F47A60", "#962fbf","purple3",
+                       "#fa7e1e", "#F47A60", "#FFF0DB", "#E4d5b7")
+                       
+palette2 <- c("#fa7e1e", "#962fbf")
+
+# Particle Size Setup ------------------------------------------------
 
 psdata <- read_excel("data/ParticleSizeExp1.xlsx")
 
@@ -58,38 +57,6 @@ CCCFdelta <- CCCF %>%
   distinct(toothNumber, .keep_all = T) %>% 
   select(-c(Sample, Tooth, Treat, Analysis))
 
-# Testing for normality
-
-shapiro.test(CCFFdelta$dC)
-shapiro.test(CCFFdelta$dO)
-shapiro.test(CCFFdelta$CO3)
-shapiro.test(CFFFdelta$dC)
-shapiro.test(CFFFdelta$dO)
-shapiro.test(CFFFdelta$CO3)
-shapiro.test(CCCFdelta$dC)
-shapiro.test(CCCFdelta$dO)
-shapiro.test(CCCFdelta$CO3)
-
-# No tests result in p < 0.05, we'll move forward with t-tests
-
-t.test(CCFFdelta$dC)
-t.test(CCFFdelta$dO)
-t.test(CCFFdelta$CO3)
-cohensD(CCFFdelta$CO3)
-
-t.test(CCCFdelta$dC)
-t.test(CCCFdelta$dO)
-cohensD(CCCFdelta$dO)
-t.test(CCCFdelta$CO3)
-cohensD(CCCFdelta$CO3)
-
-t.test(CFFFdelta$dC)
-t.test(CFFFdelta$dO)
-t.test(CFFFdelta$CO3)
-cohensD(CFFFdelta$CO3)
-
-shapiro.test(c(CCFFdelta$dO, CCCFdelta$dO))
-t.test(c(CCFFdelta$dO, CCCFdelta$dO))
 
 # Particle Size Figures ---------------------------------------------------
 
@@ -98,9 +65,8 @@ PartSizeC <- ggplot() +
   geom_boxplot(data = CCFFdelta, aes(x = Group, y = dC, fill = Group)) +
   geom_boxplot(data = CFFFdelta, aes(x = Group, y = dC, fill = Group)) +
   geom_boxplot(data = CCCFdelta, aes(x = Group, y = dC, fill = Group)) +
-  scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
+  scale_fill_manual(values = c("#fa7e1e","#d62976","#962fbf")) + 
   labs(
-    #  fill = "Particle Size", 
     x = "",
     y = expression(paste(Delta^13, "C", " (\u2030, VPDB)"))
   ) + 
@@ -115,7 +81,7 @@ PartSizeO <- ggplot() +
   geom_boxplot(data = CCFFdelta, aes(x = Group, y = dO, fill = Group)) +
   geom_boxplot(data = CFFFdelta, aes(x = Group, y = dO, fill = Group)) +
   geom_boxplot(data = CCCFdelta, aes(x = Group, y = dO, fill = Group)) +
-  scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
+  scale_fill_manual(values = c("#fa7e1e","#d62976","#962fbf")) + 
   labs(
     #   fill = "Particle Size",
     x = "",
@@ -132,9 +98,8 @@ PartSizeCO3 <- ggplot() +
   geom_boxplot(data = CCFFdelta, aes(x = Group, y = CO3, fill = Group)) +
   geom_boxplot(data = CFFFdelta, aes(x = Group, y = CO3, fill = Group)) +
   geom_boxplot(data = CCCFdelta, aes(x = Group, y = CO3, fill = Group)) +
-  scale_fill_manual(values = c("#aed6dc","#ff9a8d","#4a536b")) + 
+  scale_fill_manual(values = c("#fa7e1e","#d62976","#962fbf")) +  
   labs(
-    #   fill = "Particle Size", 
     x = "",
     y = expression(paste(Delta, "% CO"[3]))
   ) + 
@@ -204,47 +169,57 @@ T2 <- rbind(ambientT2, desiccatorT2) %>%
   distinct(tooth, .keep_all = T) %>% 
   select(-c(location))
 
-# Testing for normality
-
-shapiro.test(T1$dC)
-shapiro.test(T1$dO)
-shapiro.test(T1$CO3)
-
-shapiro.test(T2$dC)
-shapiro.test(T2$dO)
-shapiro.test(T2$CO3)
-
-# T-tests
-
-t.test(T1$dC)
-t.test(T1$dO)
-t.test(T1$CO3)
-
-t.test(T2$dC)
-wilcox.test(T2$dO)
-t.test(T2$CO3)
 
 
 # Storage Conditions Figures ----------------------------------------------
-# probably not used in the publication, but useful for quick examination
 
 storage2 <- rbind(T1, T2)
 
-ggplot(data = storage2, aes(x = time, y = dC)) + 
+storageC <- ggplot(data = storage2, aes(x = time, y = dC, fill = time)) + 
   geom_hline(yintercept = 0, lty = 3) +
   geom_boxplot() + 
-  theme_classic()
+  scale_fill_manual(values = palette2) + 
+  labs(
+    x = "",
+    y = expression(paste(Delta^13, "C", " (\u2030, VPDB)"))
+  ) + 
+  theme_classic() + 
+  theme(legend.position = 'none',
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 14))
 
-ggplot(data = storage2, aes(x = time, y = dO)) + 
+storageO <- ggplot(data = storage2, aes(x = time, y = dO, fill = time)) + 
   geom_hline(yintercept = 0, lty = 3) +
   geom_boxplot() + 
-  theme_classic()
+  scale_fill_manual(values = palette2) + 
+  labs(
+    x = "",
+    y = expression(paste(Delta^18, "O", " (\u2030, VPDB)"))
+  ) + 
+  theme_classic() + 
+  theme(legend.position = 'none',
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 14))
 
-ggplot(data = storage2, aes(x = time, y = CO3)) + 
+storageCO3 <- ggplot(data = storage2, aes(x = time, y = CO3, fill = time)) + 
   geom_hline(yintercept = 0, lty = 3) +
   geom_boxplot() + 
-  theme_classic()
+  scale_fill_manual(values = palette2) + 
+  labs(
+    x = "",
+    y = expression(paste(Delta, "% CO"[3]))
+  ) + 
+  theme_classic() + 
+  theme(legend.position = 'none',
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 14))
 
+ggarrange(storageC, storageO, storageCO3, nrow = 1)
+ggsave("Figures/Storage", dpi = 300, width = 6, height = 3,
+       units = c("in"))
 # Chemical Treatment Statistics -------------------------------------------
  
 # Import and batch name
@@ -364,68 +339,11 @@ G12 <- samps %>%
   distinct(Tooth, .keep_all = T) %>% 
   select(-c(Treat))
 
-shapiro.test(F12$dC)
-shapiro.test(F12$dO)
-shapiro.test(F12$CO3)
-
-shapiro.test(G12$dC)
-shapiro.test(G12$dO)
-shapiro.test(G12$CO3)
-
-t.test(F12$dC)
-t.test(F12$dO)
-t.test(F12$CO3)
-
-t.test(G12$dC)
-t.test(G12$dO)
-t.test(G12$CO3)
-
 # WARNING: while the control was labeled "I" in the original dataset, 
 # I'm labeling "No oxidative treatment, buffered acetic acid 15 min" as "I" to continue the lettering scheme
 
 df <- samps 
 df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
-
-# Testing for normality
-
-treats = sort(unique(df$Treat))
-treats = treats[treats != "Control"]
-shapTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
-datacols = c("d13C.m.off", "d18O.m.off", "CO3.m.off")
-
-for(i in seq_along(treats)){
-  for(j in 1:3){
-    shapTable[i, j+1] = shapiro.test(df[df$Treat == treats[i], datacols[j]])$p.value
-  }
-}
-
-# Stats for all
-
-diffTable = statTable = pTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
-
-for(i in seq_along(treats)){
-  for(j in 1:3){
-    if(shapTable[i, j+1] > 0.05){
-      test = t.test(df[df$Treat == treats[i], datacols[j]])
-      diffTable[i, j+1] = test$estimate
-      statTable[i, j+1] = test$statistic
-      pTable[i, j+1] = test$p.value
-    }else{
-      test = wilcox.test(df[df$Treat == treats[i], datacols[j]])
-      diffTable[i, j+1] = mean(df[df$Treat == treats[i], datacols[j]])
-      statTable[i, j+1] = test$statistic
-      pTable[i, j+1] = test$p.value
-    }
-  }
-}
-
-shapTable
-pTable
-diffTable
-statTable
-
-mean(diffTable[1:8, "dO"])
-mean(diffTable[pTable$dO < 0.05, "dO"])
 
 # Is there a difference between NaOCl and H2O2, regardless of time?
 df <- df %>% mutate(Group =
@@ -434,19 +352,12 @@ df <- df %>% mutate(Group =
                       )
 )
 
-t.test(df$d13C.m.off ~ df$Group)
-t.test(df$d18O.m.off ~ df$Group)
-t.test(df$CO3.m.off ~ df$Group)
-
 # Is there a difference between time of exposure to the oxidative treatment (15m versus 24h), regardless of solution used?
 df <- df %>% mutate(Time =
                       case_when(Treat == "A" | Treat == "B" | Treat == "C" | Treat == "D" ~ "15min", 
                                 Treat == "E" | Treat == "F" | Treat == "G" | Treat == "H" ~ "24h")
 )
 
-t.test(df$d13C.m.off ~ df$Time)
-t.test(df$d18O.m.off ~ df$Time)
-t.test(df$CO3.m.off ~ df$Time)
 # ALMOST significant in terms of changing oxygen values (unsurprising?) but not quite. 
 # 24 hours saw mean values of 0.48 offset, compared to 0.31 mean for 15 min group.
 
@@ -457,24 +368,15 @@ df <- df %>% mutate(Conc =
                       )
 )
 
-t.test(df$d13C.m.off ~ df$Conc)
-t.test(df$d18O.m.off ~ df$Conc)
-t.test(df$CO3.m.off ~ df$Conc)
-#no significant values there either
-
 # Chemical Treatment Figures---------------------------------------------------
 graphs <- subset(df, Treat!= 'Control')
-palette <- c( "#668C99","#306879", "#FD9C86", "#F47A60", "#668C99","#306879",
-                       "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7")
-                       
-palette2 <- c("bisque1", "midnightblue")
 
 O <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
   geom_boxplot(data = graphs, aes(x = Treat, y = d18O.m.off, fill = Treat, color = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette) +
-  scale_color_manual(values = c("#F05039", "#1F449C")) +
+  scale_color_manual(values = c("bisque", "midnightblue")) +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
@@ -487,7 +389,7 @@ C <- ggplot() +
   geom_boxplot(data = graphs, aes(x = Treat, y = d13C.m.off, fill = Treat, color = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette) +
-  scale_color_manual(values = c("#F05039", "#1F449C")) +
+  scale_color_manual(values = c("bisque", "midnightblue")) +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
@@ -500,7 +402,7 @@ CO3 <- ggplot() +
   geom_boxplot(data = graphs, aes(x = Treat, y = CO3.m.off, fill = Treat, color = Time)) + 
   theme_classic() +
   scale_fill_manual(values = palette) +
-  scale_color_manual(values = c("#F05039", "#1F449C")) +
+  scale_color_manual(values = c("bisque", "midnightblue")) +
   theme(legend.position = "none", 
         axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
