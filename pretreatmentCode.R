@@ -110,7 +110,7 @@ PartSizeCO3 <- ggplot() +
         axis.title = element_text(size = 14))
 
 ggarrange(PartSizeC, PartSizeO, PartSizeCO3, nrow = 1)
-ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 6, height = 3,
+ggsave("Figures/ParticleSize.pdf", dpi = 300, width = 10, height = 3,
        units = c("in"))
 
 # Storage Conditions Statistics--------------------------------------------
@@ -168,17 +168,19 @@ T2 <- rbind(ambientT2, desiccatorT2) %>%
          CO3 = CO3[location == 'Cabinet'] - CO3[location == 'Desiccator']) %>% 
   distinct(tooth, .keep_all = T) %>% 
   select(-c(location))
+storage2 <- rbind(T1, T2)
 
-
+# Let's try making this a bit more readable for the poster, even if the stats aren't quite right
+storage <- rbind(ambientT1, ambientT2, desiccatorT1, desiccatorT2)
+storage2 <- rbind(T1, T2)
 
 # Storage Conditions Figures ----------------------------------------------
 
-storage2 <- rbind(T1, T2)
-
 storageC <- ggplot(data = storage2, aes(x = time, y = dC, fill = time)) + 
-  geom_hline(yintercept = 0, lty = 3) +
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +  
   geom_boxplot() + 
   scale_fill_manual(values = palette2) + 
+  ylim(-1, 0.6) + 
   labs(
     x = "",
     y = expression(paste(Delta^13, "C", " (\u2030, VPDB)"))
@@ -190,9 +192,10 @@ storageC <- ggplot(data = storage2, aes(x = time, y = dC, fill = time)) +
         axis.title = element_text(size = 14))
 
 storageO <- ggplot(data = storage2, aes(x = time, y = dO, fill = time)) + 
-  geom_hline(yintercept = 0, lty = 3) +
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
   geom_boxplot() + 
   scale_fill_manual(values = palette2) + 
+  ylim(-1, 0.6) + 
   labs(
     x = "",
     y = expression(paste(Delta^18, "O", " (\u2030, VPDB)"))
@@ -204,12 +207,13 @@ storageO <- ggplot(data = storage2, aes(x = time, y = dO, fill = time)) +
         axis.title = element_text(size = 14))
 
 storageCO3 <- ggplot(data = storage2, aes(x = time, y = CO3, fill = time)) + 
-  geom_hline(yintercept = 0, lty = 3) +
+  geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
   geom_boxplot() + 
+  ylim(-1, 0.6) + 
   scale_fill_manual(values = palette2) + 
   labs(
     x = "",
-    y = expression(paste(Delta, "% CO"[3]))
+    y = expression(paste(Delta," % CO"[3]))
   ) + 
   theme_classic() + 
   theme(legend.position = 'none',
@@ -218,7 +222,7 @@ storageCO3 <- ggplot(data = storage2, aes(x = time, y = CO3, fill = time)) +
         axis.title = element_text(size = 14))
 
 ggarrange(storageC, storageO, storageCO3, nrow = 1)
-ggsave("Figures/Storage", dpi = 300, width = 6, height = 3,
+ggsave("Figures/AABAPosterStorage.png", dpi = 300, width = 10, height = 3,
        units = c("in"))
 # Chemical Treatment Statistics -------------------------------------------
  
