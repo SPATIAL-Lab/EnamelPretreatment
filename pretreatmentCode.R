@@ -231,7 +231,7 @@ t.test(T2$CO3)
 
 
 # Storage Conditions Figures ----------------------------------------------
-# probably not used in the publication, but useful for quick examination
+# not used in the publication, but useful for quick examination
 
 storage2 <- rbind(T1, T2)
 
@@ -264,6 +264,7 @@ d3$Batch = rep(221104)
 d = rbind(d1, d2, d3)
 
 # Identify Treatment Types
+
 d$Treat = d$Tooth = d$TT = character(nrow(d))
 
 for(i in 1:nrow(d)){
@@ -276,6 +277,7 @@ for(i in 1:nrow(d)){
 }
 
 # Remove some outliers
+
 d = d[d$Identifier_1 != "C4-D-3",]
 d = d[d$Identifier_1 != "C5-A-3",]
 
@@ -289,6 +291,7 @@ samps$Tooth = d$Tooth[match(samps$TT, d$TT)]
 samps$Treat = d$Treat[match(samps$TT, d$TT)]
 
 # Sample averages
+
 for(i in 1:length(TT)){
   samps$dC[i] = mean(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
   samps$dC.sd[i] = sd(d$d13C.cal[d$TT == TT[i]], na.rm = TRUE)
@@ -300,10 +303,12 @@ for(i in 1:length(TT)){
 }
 
 # Turn CO3 yields into percent values
+
 samps$CO3 = samps$CO3 * 100
 samps$CO3.sd = samps$CO3.sd * 100
 
 # Offsets
+
 samps$dO.sd.off = samps$dC.sd.off = samps$dO.off = samps$dC.off = 
   samps$CO3.off = samps$CO3.sd.off =rep(0)
 
@@ -348,10 +353,12 @@ for(i in sid){
 }
 
 # Renaming controls
+
 samps$Treat <- gsub("I2", "Control", samps$Treat)
 samps$Treat <- gsub("I", "Control", samps$Treat)
 
-# Combining repeat measures?
+# Combining repeat measures
+
 F12 <- samps %>% 
   group_by(Tooth) %>% 
   mutate(dC = dC.off[Treat == 'F2'] - dC.off[Treat == 'F'], 
@@ -385,7 +392,7 @@ t.test(G12$dO)
 t.test(G12$CO3)
 
 # WARNING: while the control was labeled "I" in the original dataset, 
-# I'm labeling "No oxidative treatment, buffered acetic acid 15 min" as "I" to continue the lettering scheme
+# we're labeling "No oxidative treatment, buffered acetic acid 15 min" as "I" to continue the lettering scheme
 
 df <- samps 
 df$Treat <- recode(df$Treat, G2 = "G", F2 = "F", CA = "I", CB = "J")
@@ -451,7 +458,6 @@ df <- df %>% mutate(Time =
 t.test(df$dC.off ~ df$Time)
 t.test(df$dO.off ~ df$Time)
 t.test(df$CO3.off ~ df$Time)
-# ALMOST significant in terms of changing oxygen values (unsurprising?) but not quite. 
 # 24 hours saw mean values of 0.48 offset, compared to 0.31 mean for 15 min group.
 
 # Concentrations
@@ -467,6 +473,7 @@ t.test(df$CO3.off ~ df$Conc)
 #no significant values there either
 
 # Chemical Treatment Figures---------------------------------------------------
+
 graphs <- subset(df, Treat!= 'Control')
 palette <- c( "#668C99","#306879", "#FD9C86", "#F47A60", "#668C99","#306879",
                        "#FD9C86", "#F47A60", "#FFF0DB", "#E4d5b7")
