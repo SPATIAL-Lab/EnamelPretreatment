@@ -68,21 +68,25 @@ shapiro.test(CCCFdelta$dO)
 shapiro.test(CCCFdelta$CO3)
 
 # No tests result in p < 0.05, we'll move forward with t-tests
+t.test(CCCFdelta$dC)
+t.test(CCCFdelta$dO)
+cohensD(CCCFdelta$dO)
+t.test(CCCFdelta$CO3)
+cohensD(CCCFdelta$CO3)
 
 t.test(CCFFdelta$dC)
 t.test(CCFFdelta$dO)
 t.test(CCFFdelta$CO3)
-
-t.test(CCCFdelta$dC)
-t.test(CCCFdelta$dO)
-t.test(CCCFdelta$CO3)
+cohensD(CCFFdelta$CO3)
 
 t.test(CFFFdelta$dC)
 t.test(CFFFdelta$dO)
 t.test(CFFFdelta$CO3)
+cohensD(CFFFdelta$CO3)
 
 shapiro.test(c(CCFFdelta$dO, CCCFdelta$dO))
-t.test(c(CCFFdelta$dO, CCCFdelta$dO))
+t.test(c(CCFFdelta$dO, CCCFdelta$dO)) #putting variables in c() allows them to group for one-sample t-test
+cohensD(c(CCFFdelta$dO, CCCFdelta$dO))
 
 # Particle Size Figures ---------------------------------------------------
 
@@ -95,7 +99,7 @@ PartSizeC <- ggplot() +
   labs(
     #  fill = "Particle Size", 
     x = "",
-    y = expression(paste(Delta^13, "C", " (\u2030, VPDB)"))
+    y = expression(paste(Delta^13, "C", " (\u2030)"))
   ) + 
   theme_classic() + 
   theme(legend.position = "none", 
@@ -112,7 +116,7 @@ PartSizeO <- ggplot() +
   labs(
     #   fill = "Particle Size",
     x = "",
-    y = expression(paste(Delta^18, "O", " (\u2030, VPDB)"))
+    y = expression(paste(Delta^18, "O", " (\u2030)"))
   ) + 
   theme_classic() + 
   theme(legend.position = "none", 
@@ -266,7 +270,6 @@ for(i in seq_along(treats)){
 }
 
 # Stats for all
-
 diffTable = statTable = pTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
 
 for(i in seq_along(treats)){
@@ -293,6 +296,9 @@ statTable
 mean(diffTable[1:8, "dO"])
 mean(diffTable[pTable$dO < 0.05, "dO"])
 
+# effects size for significant results
+cohensD(df[df$Treat == 'J', 'dC.off'])
+cohensD(df[df$Treat == 'J', 'CO3.off'])
 # Is there a difference between NaOCl and H2O2, regardless of time?
 df <- df %>% mutate(Group =
                       case_when(Treat == "A" | Treat == "B" | Treat == "E" | Treat == "F" ~ "NaOCl", 
@@ -346,7 +352,7 @@ O <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 14), ) +
   labs(x = "Treatment", 
-       y = expression(paste(Delta^18, "O", " (\u2030, VPDB)")))
+       y = expression(paste(Delta^18, "O", " (\u2030)")))
 
 C <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -359,7 +365,7 @@ C <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 14), ) +
   labs(x = "Treatment", 
-       y = expression(paste(Delta^13, "C", " (\u2030, VPDB)")))
+       y = expression(paste(Delta^13, "C", " (\u2030)")))
 
 CO3 <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -388,7 +394,7 @@ OGroup <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 14), ) +
   labs(x = "Oxidant Treatment", 
-       y = expression(paste(Delta^18, "O", " (\u2030, VPDB)")))
+       y = expression(paste(Delta^18, "O", " (\u2030)")))
 
 CGroup <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -400,7 +406,7 @@ CGroup <- ggplot() +
         axis.text.y = element_text(size = 12),
         axis.title = element_text(size = 14), ) +
   labs(x = "Oxidant Treatment", 
-       y = expression(paste(Delta^13, "C", " (\u2030, VPDB)")))
+       y = expression(paste(Delta^13, "C", " (\u2030)")))
 
 CO3Group <- ggplot() + 
   geom_hline(yintercept = 0, color = 'grey20', linetype = 2) +
@@ -493,7 +499,6 @@ ggarrange(CGroup, CTime, CConc,
 ggsave("Figures/Treatment2.pdf", dpi = 300, height = 6, width = 6, units = "in")
 
 # Replicate SD across all trials
-
 mean(c(psdata$dC.sd, ambientT1$dC.sd, ambientT1$dC.sd, desiccatorT1$dC.sd,
        desiccatorT2$dC.sd, samps$dC.sd))
 mean(c(psdata$dO.sd, ambientT1$dO.sd, ambientT1$dO.sd, desiccatorT1$dO.sd,
