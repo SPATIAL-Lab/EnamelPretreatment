@@ -270,7 +270,8 @@ for(i in seq_along(treats)){
 }
 
 # Stats for all
-diffTable = statTable = pTable = data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
+diffTable = statTable = pTable = dTable = 
+  data.frame(treats, "dC" = rep(0), "dO" = rep(0), "CO3" = rep(0))
 
 for(i in seq_along(treats)){
   for(j in 1:3){
@@ -279,26 +280,26 @@ for(i in seq_along(treats)){
       diffTable[i, j+1] = test$estimate
       statTable[i, j+1] = test$statistic
       pTable[i, j+1] = test$p.value
+      dTable[i, j+1] = cohensD(df[df$Treat == treats[i], datacols[j]])
     }else{
       test = wilcox.test(df[df$Treat == treats[i], datacols[j]])
       diffTable[i, j+1] = mean(df[df$Treat == treats[i], datacols[j]])
       statTable[i, j+1] = test$statistic
       pTable[i, j+1] = test$p.value
+      dTable[i, j+1] = cohensD(df[df$Treat == treats[i], datacols[j]])
     }
   }
 }
 
 shapTable
 pTable
+dTable
 diffTable
 statTable
 
 mean(diffTable[1:8, "dO"])
 mean(diffTable[pTable$dO < 0.05, "dO"])
 
-# effects size for significant results
-cohensD(df[df$Treat == 'J', 'dC.off'])
-cohensD(df[df$Treat == 'J', 'CO3.off'])
 # Is there a difference between NaOCl and H2O2, regardless of time?
 df <- df %>% mutate(Group =
                       case_when(Treat == "A" | Treat == "B" | Treat == "E" | Treat == "F" ~ "NaOCl", 
